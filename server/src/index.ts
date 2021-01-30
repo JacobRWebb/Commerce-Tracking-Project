@@ -1,13 +1,45 @@
 require("dotenv-safe/config");
+import { TypeormStore } from "connect-typeorm/out";
+import cors from "cors";
 import express from "express";
+import session from "express-session";
+import { createConnection, getConnection } from "typeorm";
+import { Session } from "./entities/Session";
+import routes from "./routes";
+
 const app = express();
 const PORT: number = parseInt(process.env.PORT);
 
-app.get("*", (req, res) => {
-  req;
-  res.send("API");
-});
+const main = async () => {
+  const connection = await createConnection();
+  await connection.runMigrations();
 
-app.listen(PORT, () => {
-  console.log(`Server is running.\nhttp://localhost:${PORT}/`);
+  app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+
+  app.use(
+    session({
+      name: "sid",
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365,
+        httpOnly: true,
+        sameSite: "lax",
+      },
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      store: new TypeormStore({ cleanupLimit: 2, ttl: 86400 }).connect(
+        getConnection().getRepository(Session)
+      ),
+    })
+  );
+
+  app.use(routes);
+
+  app.listen(PORT, () => {
+    console.log(`Server is running.\nhttp://localhost:${PORT}/`);
+  });
+};
+
+main().catch((err) => {
+  console.error(err);
 });
