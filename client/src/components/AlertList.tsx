@@ -46,7 +46,6 @@ export default class AlertList extends Component<{}, IAlertList> {
     return (
       <>
         <AlertListHead
-          options={this.state.options}
           toggleOptions={() => this.setState({ options: !this.state.options })}
         >
           <FilterOptions
@@ -69,24 +68,16 @@ export default class AlertList extends Component<{}, IAlertList> {
 }
 
 const AlertListHead: React.FC<{
-  options: boolean;
   toggleOptions: () => void;
-}> = ({ options, toggleOptions, children }) => {
-  const { colorMode } = useColorMode();
+}> = ({ toggleOptions, children }) => {
   return (
     <Box>
-      <Box
-        bgColor={colorMode === "light" ? "white" : "transparent"}
-        display="inline-block"
-        borderRadius={3}
-      >
-        <Heading>
-          Viewing Alert Listings
-          <Button marginLeft={5} onClick={toggleOptions}>
-            <RiFilterLine /> Filter
-          </Button>
-        </Heading>
-      </Box>
+      <Stack justify="space-between" direction="row">
+        <Heading>Viewing Alert Listings</Heading>
+        <Button onClick={toggleOptions}>
+          <RiFilterLine /> Filter
+        </Button>
+      </Stack>
       {children}
     </Box>
   );
@@ -140,14 +131,14 @@ const FilterOptions: React.FC<{
   );
 };
 
-const FilteredList: React.FC<{ alerts: IAlert[]; filter: 0 | 1 | 2 }> = ({
-  alerts,
+const FilteredList: React.FC<{ filter: number; alerts: IAlert[] }> = ({
   filter,
+  alerts,
 }) => {
   return (
     <>
       {alerts.map((alert) => {
-        if (filter === 2 || filter === alert.status) {
+        if (filter === 2 || filter === alert.currentState) {
           return <AlertCard key={alert.id} alert={alert} />;
         } else {
           return null;

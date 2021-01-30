@@ -27,7 +27,12 @@ export default class Navbar extends Component<{}, INavBar> {
 
   render() {
     return (
-      <Box paddingTop={5} paddingLeft={["10%"]} paddingRight={["10%"]}>
+      <Box
+        paddingTop={8}
+        paddingBottom={16}
+        paddingLeft={["10%"]}
+        paddingRight={["10%"]}
+      >
         <Nav>
           <NavLogo name="ATAS" />
           <NavToggle open={this.state.open} toggle={this.toggleNav} />
@@ -50,7 +55,7 @@ const Nav: React.FC<{}> = ({ children }) => {
       wrap="wrap"
       width="100%"
       marginBottom={4}
-      padding={2}
+      padding={1}
       backgroundColor={
         colorMode === "light" ? theme.colors.gray[200] : theme.colors.gray[500]
       }
