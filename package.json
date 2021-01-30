@@ -4,7 +4,8 @@
     "concurrently": "^5.3.0"
   },
   "scripts": {
-    "dev": "concurrently \"yarn dev:client\"",
-    "dev:client": "yarn --cwd client start"
+    "dev": "concurrently \"yarn dev:client\" \"yarn dev:server\"",
+    "dev:client": "yarn --cwd client start",
+    "dev:server": "yarn --cwd server start"
   }
 }
