@@ -4,7 +4,11 @@ import { Alert } from "../entities/Alert";
 const router = Router();
 
 router.get("/alerts", async (req, res) => {
-  const alerts = await Alert.find();
+  const alerts = await Alert.find({
+    order: {
+      timeStamp: "ASC",
+    },
+  });
   res.json({ info: "API Alerts", alerts });
 });
 
