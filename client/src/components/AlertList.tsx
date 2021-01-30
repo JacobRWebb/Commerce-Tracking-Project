@@ -9,34 +9,37 @@ import {
 } from "@chakra-ui/react";
 import React, { Component } from "react";
 import { RiFilterLine } from "react-icons/ri";
+import { API_DOMAIN } from "../util/consts";
 import AlertCard, { IAlert } from "./AlertCard";
 
 interface IAlertList {
   alerts: IAlert[];
-  filter: 1 | 2 | 3;
+  filter: 0 | 1 | 2;
   options: boolean;
 }
-
-const fakeData: IAlert[] = [
-  { id: 1, name: "Test 1", status: 1 },
-  { id: 2, name: "Test 2", status: 2 },
-  { id: 3, name: "Test 3", status: 2 },
-  { id: 4, name: "Test 4", status: 1 },
-  { id: 5, name: "Test 5", status: 2 },
-];
 
 export default class AlertList extends Component<{}, IAlertList> {
   constructor(props: any) {
     super(props);
     this.state = {
       alerts: [],
-      filter: 3,
+      filter: 2,
       options: false,
     };
   }
 
   componentDidMount() {
-    this.setState({ alerts: fakeData });
+    fetch(`${API_DOMAIN}/alerts`)
+      .then((result) => result.json())
+      .then((data) => {
+        if (data.alerts) {
+          this.setState({ alerts: data.alerts });
+        }
+        console.log(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   render() {
@@ -47,7 +50,7 @@ export default class AlertList extends Component<{}, IAlertList> {
           toggleOptions={() => this.setState({ options: !this.state.options })}
         >
           <FilterOptions
-            toggle={(selectedFilter: 1 | 2 | 3) =>
+            toggle={(selectedFilter: 0 | 1 | 2) =>
               this.setState({ filter: selectedFilter })
             }
             options={this.state.options}
@@ -91,7 +94,7 @@ const AlertListHead: React.FC<{
 
 const FilterOptions: React.FC<{
   options: boolean;
-  toggle: (selectedFilter: 1 | 2 | 3) => void;
+  toggle: (selectedFilter: 0 | 1 | 2) => void;
 }> = ({ options, toggle }) => {
   const { colorMode } = useColorMode();
   return (
@@ -108,7 +111,7 @@ const FilterOptions: React.FC<{
           backgroundColor={colorMode === "light" ? "white" : "black"}
           variant="outline"
           _hover={{}}
-          onClick={() => toggle(3)}
+          onClick={() => toggle(2)}
         >
           Filter Both
         </Button>
@@ -116,7 +119,7 @@ const FilterOptions: React.FC<{
           backgroundColor={colorMode === "light" ? "white" : "black"}
           variant="outline"
           _hover={{}}
-          onClick={() => toggle(2)}
+          onClick={() => toggle(1)}
           colorScheme={theme.colors.green[200]}
           color={theme.colors.green[200]}
         >
@@ -126,7 +129,7 @@ const FilterOptions: React.FC<{
           backgroundColor={colorMode === "light" ? "white" : "black"}
           variant="outline"
           _hover={{}}
-          onClick={() => toggle(1)}
+          onClick={() => toggle(0)}
           color={theme.colors.red[300]}
           colorScheme={theme.colors.red[300]}
         >
@@ -137,14 +140,14 @@ const FilterOptions: React.FC<{
   );
 };
 
-const FilteredList: React.FC<{ alerts: IAlert[]; filter: 1 | 2 | 3 }> = ({
+const FilteredList: React.FC<{ alerts: IAlert[]; filter: 0 | 1 | 2 }> = ({
   alerts,
   filter,
 }) => {
   return (
     <>
       {alerts.map((alert) => {
-        if (filter === 3 || filter === alert.status) {
+        if (filter === 2 || filter === alert.status) {
           return <AlertCard key={alert.id} alert={alert} />;
         } else {
           return null;

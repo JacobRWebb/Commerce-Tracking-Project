@@ -4,7 +4,7 @@ import React from "react";
 export interface IAlert {
   id: number;
   name: String;
-  status: 1 | 2;
+  status: 0 | 1;
 }
 
 const AlertCard: React.FC<{ alert: IAlert }> = ({ alert }) => {
@@ -24,7 +24,7 @@ const AlertCard: React.FC<{ alert: IAlert }> = ({ alert }) => {
     >
       <Box
         bgColor={
-          alert.status === 2 ? theme.colors.green[200] : theme.colors.red[300]
+          alert.status === 1 ? theme.colors.green[200] : theme.colors.red[300]
         }
         width="100%"
         height="5px"
