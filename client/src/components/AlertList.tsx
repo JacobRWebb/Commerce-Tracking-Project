@@ -1,3 +1,4 @@
+import { SearchIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -8,7 +9,6 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import React, { Component } from "react";
-import { RiFilterLine } from "react-icons/ri";
 import { API_DOMAIN } from "../util/consts";
 import AlertCard, { IAlert } from "./AlertCard";
 
@@ -57,8 +57,8 @@ export default class AlertList extends Component<{}, IAlertList> {
         </AlertListHead>
         <SimpleGrid
           marginTop={8}
-          spacing={[5, 5, 6, 10]}
-          columns={[1, 2, 3, 4]}
+          spacing={[5, 5, 6, 6, 10]}
+          columns={[1, 2, 3, 3, 4, 5]}
         >
           <FilteredList alerts={this.state.alerts} filter={this.state.filter} />
         </SimpleGrid>
@@ -74,8 +74,8 @@ const AlertListHead: React.FC<{
     <Box>
       <Stack justify="space-between" direction="row">
         <Heading>Viewing Alert Listings</Heading>
-        <Button onClick={toggleOptions}>
-          <RiFilterLine /> Filter
+        <Button onClick={toggleOptions} overflow="hidden">
+          <SearchIcon marginRight={1} /> Filter
         </Button>
       </Stack>
       {children}
@@ -87,7 +87,6 @@ const FilterOptions: React.FC<{
   options: boolean;
   toggle: (selectedFilter: 0 | 1 | 2) => void;
 }> = ({ options, toggle }) => {
-  const { colorMode } = useColorMode();
   return (
     <Box
       display={options ? "block" : "none"}
@@ -98,36 +97,48 @@ const FilterOptions: React.FC<{
       paddingBottom={2}
     >
       <Stack spacing={5} justify="space-evenly" direction={["column", "row"]}>
-        <Button
-          backgroundColor={colorMode === "light" ? "white" : "black"}
-          variant="outline"
-          _hover={{}}
-          onClick={() => toggle(2)}
+        <FilterOptionButton
+          func={toggle}
+          value={2}
+          color={theme.colors.gray[500]}
         >
           Filter Both
-        </Button>
-        <Button
-          backgroundColor={colorMode === "light" ? "white" : "black"}
-          variant="outline"
-          _hover={{}}
-          onClick={() => toggle(1)}
-          colorScheme={theme.colors.green[200]}
+        </FilterOptionButton>
+        <FilterOptionButton
+          func={toggle}
+          value={1}
           color={theme.colors.green[200]}
         >
           Acknowledged
-        </Button>
-        <Button
-          backgroundColor={colorMode === "light" ? "white" : "black"}
-          variant="outline"
-          _hover={{}}
-          onClick={() => toggle(0)}
-          color={theme.colors.red[300]}
-          colorScheme={theme.colors.red[300]}
+        </FilterOptionButton>
+        <FilterOptionButton
+          func={toggle}
+          value={0}
+          color={theme.colors.red[200]}
         >
           Un-Acknowledged
-        </Button>
+        </FilterOptionButton>
       </Stack>
     </Box>
+  );
+};
+
+const FilterOptionButton: React.FC<{
+  func: (value: any) => void;
+  value: any;
+  color?: string;
+}> = ({ children, func, value, color = "black" }) => {
+  const { colorMode } = useColorMode();
+  return (
+    <Button
+      backgroundColor={colorMode === "light" ? "white" : "black"}
+      variant="outline"
+      onClick={() => func(value)}
+      color={color}
+      colorScheme={color}
+    >
+      {children}
+    </Button>
   );
 };
 

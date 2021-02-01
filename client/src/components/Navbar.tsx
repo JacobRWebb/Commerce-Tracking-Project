@@ -1,13 +1,13 @@
-import { Box, Flex, Stack, Text, theme, useColorMode } from "@chakra-ui/react";
+import { HamburgerIcon, MinusIcon } from "@chakra-ui/icons";
+import { Box, Stack, Text, theme, useColorMode } from "@chakra-ui/react";
 import React, { Component } from "react";
-import { AiOutlineClose, RiStackFill } from "react-icons/all";
 import { Link } from "react-router-dom";
 
 interface INavBar {
   open: boolean;
   auth: boolean;
-  username: string;
-  role: string;
+  username?: string;
+  role?: string;
 }
 
 export default class Navbar extends Component<{}, INavBar> {
@@ -15,9 +15,7 @@ export default class Navbar extends Component<{}, INavBar> {
     super(props);
     this.state = {
       auth: false,
-      role: "",
       open: false,
-      username: "",
     };
   }
 
@@ -28,14 +26,16 @@ export default class Navbar extends Component<{}, INavBar> {
   render() {
     return (
       <Box
-        paddingTop={8}
-        paddingBottom={16}
+        paddingTop={9}
+        paddingBottom={9}
         paddingLeft={["10%"]}
         paddingRight={["10%"]}
       >
         <Nav>
-          <NavLogo name="ATAS" />
-          <NavToggle open={this.state.open} toggle={this.toggleNav} />
+          <Stack width="100%" justify="space-between" direction="row">
+            <NavLogo name="ATAS" />
+            <NavToggle open={this.state.open} toggle={this.toggleNav} />
+          </Stack>
           <NavMenu open={this.state.open}>
             <NavItem to="/">Home</NavItem>
           </NavMenu>
@@ -48,22 +48,20 @@ export default class Navbar extends Component<{}, INavBar> {
 const Nav: React.FC<{}> = ({ children }) => {
   const { colorMode } = useColorMode();
   return (
-    <Flex
+    <Stack
       as="nav"
       align="center"
       justify="space-between"
-      wrap="wrap"
-      width="100%"
-      marginBottom={4}
+      direction={["column", "row"]}
       padding={1}
       backgroundColor={
-        colorMode === "light" ? theme.colors.gray[200] : theme.colors.gray[500]
+        colorMode === "light" ? theme.colors.gray[200] : theme.colors.gray[600]
       }
       borderRadius={"5px"}
       overflow="hidden"
     >
       {children}
-    </Flex>
+    </Stack>
   );
 };
 
@@ -85,14 +83,13 @@ const NavMenu: React.FC<{ open: boolean }> = ({ children, open }) => {
     <Box
       display={{ base: open ? "block" : "none", sm: "block" }}
       flexBasis={{ base: "100%", sm: "auto" }}
+      width="100%"
     >
       <Stack
-        spacing={[6, 6, 6, 8]}
+        spacing={6}
         align="center"
         justify={["center", "flex-end"]}
         direction={["column", "row"]}
-        paddingTop={[4, 0]}
-        paddingRight={2}
       >
         {children}
       </Stack>
@@ -110,10 +107,15 @@ const NavItem: React.FC<{ to: string; logout?: () => void }> = ({
     <Box
       borderRadius={2}
       boxShadow={["none", "lg"]}
-      backgroundColor={colorMode === "light" ? ["", "white"] : ["", "black"]}
+      backgroundColor={
+        colorMode === "light"
+          ? [theme.colors.gray[300], "white"]
+          : [theme.colors.gray[500], "black"]
+      }
       color={colorMode === "light" ? "black" : "white"}
       padding={1}
-      width={["250px", "5rem", "7rem"]}
+      marginRight={["", 1, 2, 3]}
+      width={["100%", "unset"]}
       textAlign={["center"]}
       onClick={logout !== null ? logout : () => {}}
     >
@@ -128,14 +130,17 @@ const NavToggle: React.FC<{ open: boolean; toggle: () => void }> = ({
   toggle,
   open,
 }) => {
-  const color = "white";
   return (
     <Box
       display={{ base: "block", sm: "none" }}
-      marginRight={5}
+      marginRight={2}
       onClick={toggle}
     >
-      {open ? <AiOutlineClose color={color} /> : <RiStackFill color={color} />}
+      {open ? (
+        <MinusIcon paddingBottom={1} />
+      ) : (
+        <HamburgerIcon paddingBottom={1} />
+      )}
     </Box>
   );
 };

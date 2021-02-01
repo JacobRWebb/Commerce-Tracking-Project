@@ -22,8 +22,9 @@ export const Background: React.FC = ({ children }) => {
 const Layout: React.FC = ({ children }) => {
   return (
     <Box
-      marginLeft={["20px", "20px", "40px", "40px"]}
-      marginRight={["20px", "20px", "40px", "40px"]}
+      marginLeft={["20px", "20px", "40px"]}
+      marginRight={["20px", "20px", "40px"]}
+      paddingBottom={10}
     >
       {children}
     </Box>
