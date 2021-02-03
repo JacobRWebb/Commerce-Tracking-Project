@@ -12,16 +12,16 @@ ATAS will present a list of alerts to authenticated users that fall within two s
 
 ### Frontend
 
-[ ] Display alert list
-[ ] Prompt user to edit alert
-[ ] Login
-[ ] Admin Dashboard
+- [ ] Display alert list
+- [ ] Prompt user to edit alert
+- [ ] Login
+- [ ] Admin Dashboard
 
 ### Backend
 
-[ ] Alert API (Retrieve, Edit)
-[x] Login API
+- [ ] Alert API (Retrieve, Edit)
+- [x] Login API
 
 ## Extra Goals
 
-[ ] System sends out emails when alerts have not be acknowledge in 2 days and as new alerts arrive.
+- [ ] System sends out emails when alerts have not be acknowledge in 2 days and as new alerts arrive.
