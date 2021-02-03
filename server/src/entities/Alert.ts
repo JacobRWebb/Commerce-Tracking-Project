@@ -3,17 +3,20 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   Timestamp,
   UpdateDateColumn,
 } from "typeorm";
+import { Application } from "./Application";
+import { User } from "./User";
 
 @Entity()
 export class Alert extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: number;
 
-  @Column()
+  @Column({ default: 0, nullable: true })
   currentState: number;
 
   @Column({ nullable: true })
@@ -22,19 +25,22 @@ export class Alert extends BaseEntity {
   @Column("timestamp")
   timeStamp: Timestamp;
 
-  @Column()
+  @Column({ nullable: false })
   hostname: string;
 
-  @Column()
-  application_id: string;
+  @OneToOne(() => User, { nullable: true })
+  acknowledged_user: User;
 
-  @Column()
+  @OneToOne(() => Application)
+  application_id: Application;
+
+  @Column({ nullable: false })
   file: string;
 
-  @Column()
+  @Column({ nullable: false })
   change_agent: string;
 
-  @Column()
+  @Column({ nullable: false })
   change_process: string;
 
   @CreateDateColumn()
