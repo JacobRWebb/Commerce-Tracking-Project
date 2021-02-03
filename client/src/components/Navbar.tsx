@@ -6,31 +6,21 @@ import { API_DOMAIN } from "../util/consts";
 
 interface INavBar {
   open: boolean;
-  auth: boolean;
-  username?: string;
-  role?: string;
+  _user?: { username: string; role: "user" | "admin" };
 }
 
-export default class Navbar extends Component<{}, INavBar> {
+export default class Navbar extends Component<
+  {
+    _user?: { username: string; role: "user" | "admin" };
+  },
+  INavBar
+> {
   constructor(props: any) {
     super(props);
     this.state = {
-      auth: false,
       open: false,
+      _user: this.props._user,
     };
-  }
-
-  componentDidMount() {
-    fetch(API_DOMAIN + "/user/", { credentials: "include" })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          this.setState({ auth: true });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
   }
 
   toggleNav = () => {
@@ -39,10 +29,8 @@ export default class Navbar extends Component<{}, INavBar> {
 
   logout = () => {
     fetch(`${API_DOMAIN}/user/logout`, { credentials: "include" })
-      .catch(() => console.log("wtf"))
-      .finally(() => {
-        console.log("Logout");
-      });
+      .catch(() => {})
+      .finally(() => {});
   };
 
   render() {
@@ -60,8 +48,8 @@ export default class Navbar extends Component<{}, INavBar> {
           </Stack>
           <NavMenu open={this.state.open}>
             <NavItem to="/">Home</NavItem>
-            {this.state.auth && (
-              <NavItem logout={this.logout} to="/logout">
+            {this.state._user && (
+              <NavItem logout={this.logout} to="*">
                 Logout
               </NavItem>
             )}
@@ -131,28 +119,28 @@ const NavItem: React.FC<{ to: string; logout?: () => void }> = ({
 }) => {
   const { colorMode } = useColorMode();
   return (
-    <Box
-      borderRadius={2}
-      boxShadow={["none", "lg"]}
-      backgroundColor={
-        colorMode === "light"
-          ? [theme.colors.gray[300], "white"]
-          : [theme.colors.gray[500], "black"]
-      }
-      color={colorMode === "light" ? "black" : "white"}
-      paddingTop={1}
-      paddingRight={[1, 3, 5]}
-      paddingLeft={[1, 3, 5]}
-      paddingBottom={1}
-      marginRight={["", 1, 2, 3]}
-      width={["100%", "unset"]}
-      textAlign={["center"]}
-      onClick={logout !== null ? logout : () => {}}
-    >
-      <Link to={to}>
+    <Link to={to}>
+      <Box
+        borderRadius={2}
+        boxShadow={["none", "lg"]}
+        backgroundColor={
+          colorMode === "light"
+            ? [theme.colors.gray[300], "white"]
+            : [theme.colors.gray[500], "black"]
+        }
+        color={colorMode === "light" ? "black" : "white"}
+        paddingTop={1}
+        paddingRight={[1, 3, 5]}
+        paddingLeft={[1, 3, 5]}
+        paddingBottom={1}
+        marginRight={["", 1, 2, 3]}
+        width={["100%", "unset"]}
+        textAlign={["center"]}
+        onClick={logout !== null ? logout : () => {}}
+      >
         <Text display="block">{children}</Text>
-      </Link>
-    </Box>
+      </Box>
+    </Link>
   );
 };
 
