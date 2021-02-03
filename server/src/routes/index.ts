@@ -6,7 +6,7 @@ const router = Router();
 router.get("/alerts", async (req, res) => {
   const alerts = await Alert.find({
     order: {
-      timeStamp: "ASC",
+      timeStamp: "DESC",
     },
   });
   res.json({ info: "API Alerts", alerts });
