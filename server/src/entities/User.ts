@@ -11,6 +11,11 @@ import {
 } from "typeorm";
 import { Application } from "./Application";
 
+export enum UserRoles {
+  ADMIN = "admin",
+  USER = "user",
+}
+
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -21,6 +26,9 @@ export class User extends BaseEntity {
 
   @Column({ nullable: false, select: false })
   password: string;
+
+  @Column({ type: "enum", enum: UserRoles, default: UserRoles.USER })
+  role: UserRoles;
 
   @ManyToMany(() => Application)
   @JoinTable()

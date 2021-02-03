@@ -1,28 +1,13 @@
 import { Router } from "express";
-import { MoreThan } from "typeorm";
-import { Alert } from "../entities/Alert";
 import { IsAuth } from "../middleware/Auth";
+import AlertRoute from "./alertRoute";
 import UserRoute from "./userRoute";
 
 const router = Router();
 
 router.use("/user", UserRoute);
 
-router.get("/alerts", IsAuth, async (req, res) => {
-  const date = new Date();
-  date.setDate(date.getDate() - 2);
-
-  const alerts = await Alert.find({
-    order: {
-      timeStamp: "DESC",
-    },
-    take: 100,
-    where: {
-      timeStamp: MoreThan(date.toISOString()),
-    },
-  });
-  res.json({ info: "API Alerts", alerts });
-});
+router.use("/alert", IsAuth, AlertRoute);
 
 //  Fallback Route
 router.get("/", (req, res) => {
