@@ -47,5 +47,5 @@ main().catch((err) => {
 
 const generate = async () => {
   await FakeData.generateUsers(10);
-  await FakeData.generateAlerts(55);
+  await FakeData.generateAlerts(400);
 };

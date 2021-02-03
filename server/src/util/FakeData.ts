@@ -22,7 +22,7 @@ export default new (class FakeData {
       let a = Alert.create({
         currentState: faker.random.number(1),
         comment: faker.lorem.paragraph(),
-        timeStamp: faker.date.past(1),
+        timeStamp: faker.date.recent(2),
         hostname: faker.internet.domainName(),
         file: faker.system.filePath(),
         change_agent: "system",
