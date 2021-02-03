@@ -140,7 +140,10 @@ const NavItem: React.FC<{ to: string; logout?: () => void }> = ({
           : [theme.colors.gray[500], "black"]
       }
       color={colorMode === "light" ? "black" : "white"}
-      padding={1}
+      paddingTop={1}
+      paddingRight={[1, 3, 5]}
+      paddingLeft={[1, 3, 5]}
+      paddingBottom={1}
       marginRight={["", 1, 2, 3]}
       width={["100%", "unset"]}
       textAlign={["center"]}
