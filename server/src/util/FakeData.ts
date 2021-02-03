@@ -4,8 +4,10 @@ import { User } from "../entities/User";
 
 export default new (class FakeData {
   generateUsers = async (amount: number = 1) => {
-    for (let i = 0; i < amount; i++) {
-      let u;
+    let u = User.create({ username: "master", password: "master" });
+    await u.save();
+
+    for (let i = 0; i < amount - 1; i++) {
       let name = faker.name.findName();
       let username = faker.internet.userName(name);
       let password = faker.internet.password();

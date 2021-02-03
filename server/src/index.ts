@@ -1,4 +1,5 @@
 require("dotenv-safe/config");
+import bodyParser from "body-parser";
 import { TypeormStore } from "connect-typeorm/out";
 import cors from "cors";
 import express from "express";
@@ -16,6 +17,8 @@ const main = async () => {
   await connection.runMigrations();
   await generate();
   app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
 
   app.use(
     session({

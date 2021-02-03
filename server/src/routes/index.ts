@@ -1,10 +1,14 @@
 import { Router } from "express";
 import { MoreThan } from "typeorm";
 import { Alert } from "../entities/Alert";
+import { IsAuth } from "../middleware/Auth";
+import UserRoute from "./userRoute";
 
 const router = Router();
 
-router.get("/alerts", async (req, res) => {
+router.use("/user", UserRoute);
+
+router.get("/alerts", IsAuth, async (req, res) => {
   const date = new Date();
   date.setDate(date.getDate() - 2);
 
