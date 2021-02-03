@@ -12,7 +12,7 @@ ATAS will present a list of alerts to authenticated users that fall within two s
 
 ### Frontend
 
-- [ ] Display alert list
+- [x] Display alert list
 - [ ] Prompt user to edit alert
 - [ ] Login
 - [ ] Admin Dashboard
