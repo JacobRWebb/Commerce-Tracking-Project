@@ -2,6 +2,7 @@ import { HamburgerIcon, MinusIcon } from "@chakra-ui/icons";
 import { Box, Stack, Text, theme, useColorMode } from "@chakra-ui/react";
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import { API_DOMAIN } from "../util/consts";
 
 interface INavBar {
   open: boolean;
@@ -19,8 +20,29 @@ export default class Navbar extends Component<{}, INavBar> {
     };
   }
 
+  componentDidMount() {
+    fetch(API_DOMAIN + "/user/", { credentials: "include" })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          this.setState({ auth: true });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   toggleNav = () => {
     this.setState({ open: !this.state.open });
+  };
+
+  logout = () => {
+    fetch(`${API_DOMAIN}/user/logout`, { credentials: "include" })
+      .catch(() => console.log("wtf"))
+      .finally(() => {
+        console.log("Logout");
+      });
   };
 
   render() {
@@ -38,6 +60,11 @@ export default class Navbar extends Component<{}, INavBar> {
           </Stack>
           <NavMenu open={this.state.open}>
             <NavItem to="/">Home</NavItem>
+            {this.state.auth && (
+              <NavItem logout={this.logout} to="/logout">
+                Logout
+              </NavItem>
+            )}
           </NavMenu>
         </Nav>
       </Box>

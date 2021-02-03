@@ -5,9 +5,9 @@ import {
   Route,
   Switch,
 } from "react-router-dom";
-import Navbar from "./components/Navbar";
 import Homepage from "./components/pages/Homepage";
 import { Background } from "./components/pages/Layout";
+import Login from "./components/pages/Login";
 import Toggle from "./components/Toggle";
 
 function App() {
@@ -24,9 +24,9 @@ function App() {
           minWidth="100vw"
         >
           <Router>
-            <Navbar />
             <Switch>
               <Route path="/" exact component={Homepage} />
+              <Route path="/login" component={Login} />
               <Redirect to="/" />
             </Switch>
           </Router>

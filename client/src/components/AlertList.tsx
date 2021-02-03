@@ -9,6 +9,7 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
 import { API_DOMAIN } from "../util/consts";
 import AlertCard, { IAlert } from "./AlertCard";
 
@@ -16,6 +17,8 @@ interface IAlertList {
   alerts: IAlert[];
   filter: 0 | 1 | 2;
   options: boolean;
+  auth: boolean;
+  checking: boolean;
 }
 
 export default class AlertList extends Component<{}, IAlertList> {
@@ -25,24 +28,41 @@ export default class AlertList extends Component<{}, IAlertList> {
       alerts: [],
       filter: 2,
       options: false,
+      auth: false,
+      checking: true,
     };
   }
 
   componentDidMount() {
-    fetch(`${API_DOMAIN}/alerts`)
+    fetch(`${API_DOMAIN}/user/`, { credentials: "include" })
       .then((result) => result.json())
       .then((data) => {
-        if (data.alerts) {
-          this.setState({ alerts: data.alerts });
+        if (data.success) {
+          this.setState({ auth: true });
         }
-        console.log(data);
       })
-      .catch((err) => {
-        console.log(err);
+      .then(() => {
+        fetch(`${API_DOMAIN}/alerts`, { credentials: "include" })
+          .then((result) => result.json())
+          .then((data) => {
+            if (data.alerts) {
+              this.setState({ alerts: data.alerts });
+            }
+            console.log(data);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .finally(() => {
+        this.setState({ checking: false });
       });
   }
 
   render() {
+    if (!this.state.auth && !this.state.checking) {
+      return <Redirect to="/login" />;
+    }
     return (
       <>
         <AlertListHead

@@ -5,6 +5,6 @@ export const IsAuth = async (
   res: Express.Response,
   next: () => void
 ) => {
-  if (!req.session._user) return res.json({ auth: false });
+  if (!req.session._user) return res.json({ auth: false, success: false });
   return next();
 };

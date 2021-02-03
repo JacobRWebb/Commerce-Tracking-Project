@@ -11,7 +11,7 @@ declare module "express-session" {
 }
 
 router.get("/", IsAuth, (req, res) => {
-  res.json({ reqUser: req.session._user });
+  res.json({ success: true, reqUser: req.session._user });
 });
 
 router.post("/login", async (req, res) => {
