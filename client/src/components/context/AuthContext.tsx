@@ -1,10 +1,17 @@
 import React, { Component } from "react";
 import { API_DOMAIN } from "../../util/consts";
 
+export enum UserRoles {
+  ADMIN = "admin",
+  USER = "user",
+  GUEST = "guest",
+}
+
 export interface IAuthState {
   checking: boolean;
   authenticated: boolean;
-  setLogin: () => void;
+  role: UserRoles;
+  login: (username: string, password: string) => Promise<Boolean>;
   logout: () => void;
 }
 
@@ -17,7 +24,8 @@ export class AuthProvider extends Component<{}, IAuthState> {
     this.state = {
       checking: true,
       authenticated: false,
-      setLogin: this.setLogin,
+      role: UserRoles.USER,
+      login: this.login,
       logout: this.logout,
     };
   }
@@ -26,8 +34,11 @@ export class AuthProvider extends Component<{}, IAuthState> {
     fetch(`${API_DOMAIN}/user/`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) {
-          this.setState({ authenticated: true });
+        if (data.reqUser) {
+          this.setState({
+            authenticated: data.success,
+            role: data.reqUser.role,
+          });
         }
       })
       .catch((err) => {
@@ -39,8 +50,21 @@ export class AuthProvider extends Component<{}, IAuthState> {
       });
   }
 
-  setLogin = () => {
-    this.setState({ authenticated: true });
+  login = async (username: string, password: string): Promise<Boolean> => {
+    const loginResponse = await fetch(`${API_DOMAIN}/user/login`, {
+      credentials: "include",
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+      headers: { "Content-Type": "application/json" },
+    }).then((data) => data.json());
+    if (loginResponse.success) {
+      this.setState({
+        authenticated: true,
+        role: loginResponse.reqUser.role,
+      });
+      return true;
+    }
+    return false;
   };
 
   logout = () => {
@@ -49,7 +73,7 @@ export class AuthProvider extends Component<{}, IAuthState> {
         console.log("Logout Error");
       })
       .finally(() => {
-        this.setState({ authenticated: false });
+        this.setState({ authenticated: false, role: UserRoles.GUEST });
       });
   };
 
