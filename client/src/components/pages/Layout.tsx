@@ -13,6 +13,7 @@ export const Background: React.FC = ({ children }) => {
       }
       backgroundSize={colorMode === "light" ? "25px 25px" : "75px 75px"}
       backgroundPosition="-19px -19px"
+      overflowX="hidden"
     >
       {children}
     </Box>
@@ -21,11 +22,7 @@ export const Background: React.FC = ({ children }) => {
 
 const Layout: React.FC = ({ children }) => {
   return (
-    <Box
-      marginLeft={["20px", "20px", "40px"]}
-      marginRight={["20px", "20px", "40px"]}
-      paddingBottom={10}
-    >
+    <Box paddingBottom={10} padding={9}>
       {children}
     </Box>
   );
