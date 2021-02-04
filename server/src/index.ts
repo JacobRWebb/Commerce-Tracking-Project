@@ -14,7 +14,9 @@ const PORT: number = parseInt(process.env.PORT);
 
 const generate = async () => {
   const connection = await createConnection();
-  await connection.runMigrations();
+  const run = await connection.runMigrations({ transaction: "all" });
+  console.log(run);
+
   await FakeData.generateUsers(10);
   await FakeData.generateAlerts(400);
 };
