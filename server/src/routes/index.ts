@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { IsAuth } from "../middleware/Auth";
 import AlertRoute from "./alertRoute";
 import UserRoute from "./userRoute";
 
@@ -7,7 +6,7 @@ const router = Router();
 
 router.use("/user", UserRoute);
 
-router.use("/alert", IsAuth, AlertRoute);
+router.use("/alert", AlertRoute);
 
 //  Fallback Route
 router.get("/", (req, res) => {

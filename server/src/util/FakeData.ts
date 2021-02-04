@@ -1,5 +1,6 @@
 import faker from "faker";
 import { Alert } from "../entities/Alert";
+import { Application } from "../entities/Application";
 import { User, UserRoles } from "../entities/User";
 
 export default new (class FakeData {
@@ -31,11 +32,13 @@ export default new (class FakeData {
   };
 
   generateAlerts = async (amount: number = 1) => {
+    let application = Application.create({ identifier: "abc" });
+    await application.save();
+
     for (let i = 0; i < amount; i++) {
       let a = Alert.create({
-        currentState: faker.random.number(1),
-        comment: faker.lorem.paragraph(),
-        timeStamp: faker.date.recent(2),
+        application: application,
+        timestamp: faker.date.recent(2),
         hostname: faker.internet.domainName(),
         file: faker.system.filePath(),
         change_agent: "system",
