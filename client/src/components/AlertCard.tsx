@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import moment from "moment";
 import React from "react";
+import { Link } from "react-router-dom";
 
 export interface IAlert {
   id: number;
@@ -56,9 +57,11 @@ const AlertCard: React.FC<{ alert: IAlert }> = ({ alert }) => {
       </Box>
       <Stack direction={["column", "row"]} justify="space-between" padding={2}>
         <Text textAlign="center">{moment(alert.timeStamp).fromNow()}</Text>
-        <Button variant="outline" colorScheme="black">
-          View
-        </Button>
+        <Link to={`/alert/${alert.id}`}>
+          <Button variant="outline" colorScheme="black">
+            View
+          </Button>
+        </Link>
       </Stack>
     </Box>
   );

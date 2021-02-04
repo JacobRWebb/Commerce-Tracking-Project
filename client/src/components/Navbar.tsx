@@ -1,25 +1,27 @@
 import { HamburgerIcon, MinusIcon } from "@chakra-ui/icons";
-import { Box, Stack, Text, theme, useColorMode } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Stack,
+  Text,
+  theme,
+  useColorMode,
+} from "@chakra-ui/react";
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import { API_DOMAIN } from "../util/consts";
+import AuthContext, { IAuthState } from "./context/AuthContext";
 
 interface INavBar {
   open: boolean;
-  _user?: { username: string; role: "user" | "admin" };
 }
 
-export default class Navbar extends Component<
-  {
-    _user?: { username: string; role: "user" | "admin" };
-  },
-  INavBar
-> {
+export default class Navbar extends Component<{}, INavBar> {
+  static contextType = AuthContext;
+
   constructor(props: any) {
     super(props);
     this.state = {
       open: false,
-      _user: this.props._user,
     };
   }
 
@@ -27,13 +29,10 @@ export default class Navbar extends Component<
     this.setState({ open: !this.state.open });
   };
 
-  logout = () => {
-    fetch(`${API_DOMAIN}/user/logout`, { credentials: "include" })
-      .catch(() => {})
-      .finally(() => {});
-  };
-
   render() {
+    const { AuthState } = this.context;
+    const authState: IAuthState = AuthState;
+
     return (
       <Box
         paddingTop={9}
@@ -47,11 +46,11 @@ export default class Navbar extends Component<
             <NavToggle open={this.state.open} toggle={this.toggleNav} />
           </Stack>
           <NavMenu open={this.state.open}>
-            <NavItem to="/">Home</NavItem>
-            {this.state._user && (
-              <NavItem logout={this.logout} to="*">
-                Logout
-              </NavItem>
+            <Link to="/">
+              <NavItem>Home</NavItem>
+            </Link>
+            {authState.authenticated && (
+              <NavItem onClick={authState.logout}>Logout</NavItem>
             )}
           </NavMenu>
         </Nav>
@@ -112,35 +111,34 @@ const NavMenu: React.FC<{ open: boolean }> = ({ children, open }) => {
   );
 };
 
-const NavItem: React.FC<{ to: string; logout?: () => void }> = ({
-  to = "/",
-  logout,
-  children,
-}) => {
+const NavItem: React.FC<{ onClick?: () => void }> = ({ children, onClick }) => {
   const { colorMode } = useColorMode();
   return (
-    <Link to={to}>
-      <Box
-        borderRadius={2}
-        boxShadow={["none", "lg"]}
-        backgroundColor={
-          colorMode === "light"
-            ? [theme.colors.gray[300], "white"]
-            : [theme.colors.gray[500], "black"]
-        }
-        color={colorMode === "light" ? "black" : "white"}
+    <Box
+      borderRadius={2}
+      boxShadow={["none", "lg"]}
+      backgroundColor={
+        colorMode === "light"
+          ? [theme.colors.gray[300], "white"]
+          : [theme.colors.gray[500], "black"]
+      }
+      color={colorMode === "light" ? "black" : "white"}
+      marginRight={["", 1, 2, 3]}
+      width={["100%", "unset"]}
+      textAlign={["center"]}
+    >
+      <Button
         paddingTop={1}
         paddingRight={[1, 3, 5]}
         paddingLeft={[1, 3, 5]}
         paddingBottom={1}
-        marginRight={["", 1, 2, 3]}
-        width={["100%", "unset"]}
-        textAlign={["center"]}
-        onClick={logout !== null ? logout : () => {}}
+        variant="link"
+        display="block"
+        onClick={onClick !== null ? onClick : undefined}
       >
-        <Text display="block">{children}</Text>
-      </Box>
-    </Link>
+        {children}
+      </Button>
+    </Box>
   );
 };
 
