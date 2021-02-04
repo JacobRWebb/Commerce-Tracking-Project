@@ -5,15 +5,15 @@ import { User, UserRoles } from "../entities/User";
 export default new (class FakeData {
   generateUsers = async (amount: number = -2) => {
     let u = User.create({
-      username: "master",
-      password: "master",
-      role: UserRoles.ADMIN,
-    });
-    await u.save();
-    u = User.create({
       username: "user",
       password: "user",
       role: UserRoles.USER,
+    });
+    await u.save();
+    u = User.create({
+      username: "master",
+      password: "master",
+      role: UserRoles.ADMIN,
     });
     await u.save();
 

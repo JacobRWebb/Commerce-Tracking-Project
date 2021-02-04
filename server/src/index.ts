@@ -12,9 +12,14 @@ import FakeData from "./util/FakeData";
 const app = express();
 const PORT: number = parseInt(process.env.PORT);
 
-const main = async () => {
+const generate = async () => {
   const connection = await createConnection();
   await connection.runMigrations();
+  await FakeData.generateUsers(10);
+  await FakeData.generateAlerts(400);
+};
+
+const main = async () => {
   await generate();
   app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,8 +52,3 @@ const main = async () => {
 main().catch((err) => {
   console.error(err);
 });
-
-const generate = async () => {
-  await FakeData.generateUsers(10);
-  await FakeData.generateAlerts(400);
-};
