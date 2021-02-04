@@ -3,12 +3,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   Timestamp,
   UpdateDateColumn,
 } from "typeorm";
+import { Alert } from "./Alert";
 import { User } from "./User";
 
 @Entity()
@@ -19,9 +20,11 @@ export class Application extends BaseEntity {
   @Column({ unique: true, nullable: false })
   identifier: string;
 
-  @ManyToMany(() => User)
-  @JoinTable()
+  @ManyToMany(() => User, (user) => user.applications)
   users: User[];
+
+  @OneToMany(() => Alert, (alert) => alert.application)
+  alerts: Alert[];
 
   @CreateDateColumn()
   createdAt: Timestamp;

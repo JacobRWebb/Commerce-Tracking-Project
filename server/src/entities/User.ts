@@ -3,12 +3,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   Timestamp,
   UpdateDateColumn,
 } from "typeorm";
+import { Alert } from "./Alert";
 import { Application } from "./Application";
 
 export enum UserRoles {
@@ -30,9 +31,11 @@ export class User extends BaseEntity {
   @Column({ type: "enum", enum: UserRoles, default: UserRoles.USER })
   role: UserRoles;
 
-  @ManyToMany(() => Application)
-  @JoinTable()
+  @ManyToMany(() => Application, (application) => application.users)
   applications: Application[];
+
+  @OneToMany(() => Alert, (alert) => alert.user)
+  acknowledged_alerts: Alert[];
 
   @CreateDateColumn({ select: false })
   createdAt: Timestamp;

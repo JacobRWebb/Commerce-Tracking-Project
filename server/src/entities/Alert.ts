@@ -3,7 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   Timestamp,
   UpdateDateColumn,
@@ -22,17 +22,17 @@ export class Alert extends BaseEntity {
   @Column({ nullable: true })
   comment: string;
 
-  @Column("timestamp")
-  timeStamp: Timestamp;
+  @Column("timestamp", { default: new Date().toISOString() })
+  timestamp: Timestamp;
 
   @Column({ nullable: false })
   hostname: string;
 
-  @OneToOne(() => User, { nullable: true })
-  acknowledged_user: User;
+  @ManyToOne(() => User, (user) => user.acknowledged_alerts)
+  user: User;
 
-  @OneToOne(() => Application)
-  application_id: Application;
+  @ManyToOne(() => Application, (application) => application.alerts)
+  application: Application;
 
   @Column({ nullable: false })
   file: string;
