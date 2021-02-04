@@ -11,60 +11,36 @@ import {
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import { API_DOMAIN } from "../../util/consts";
+import AuthContext, { IAuthState } from "../context/AuthContext";
 
 interface ILogin {
   username: string;
   password: string;
   loading: boolean;
-  auth: boolean;
 }
 
 export default class Login extends Component<{}, ILogin> {
+  static contextType = AuthContext;
+
   constructor(props: any) {
     super(props);
     this.state = {
       username: "",
       password: "",
       loading: false,
-      auth: false,
     };
   }
 
-  componentDidMount() {
-    fetch(`${API_DOMAIN}/user/`, { credentials: "include" })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          this.setState({ auth: true });
-        }
-      })
-      .catch((err) => console.log(err));
-  }
-
-  login = () => {
-    let { username, password } = this.state;
-    // Willingly Ignoring Validation...
-    this.setState({ loading: true });
-    fetch(`${API_DOMAIN}/user/login`, {
-      credentials: "include",
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) this.setState({ auth: true });
-        else this.setState({ loading: false });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
   submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const { AuthState } = this.context;
+    const authState: IAuthState = AuthState;
+
     let { username, password } = this.state;
     // Willingly Ignoring Validation...
     this.setState({ loading: true });
+    let temp = false;
     await fetch(`${API_DOMAIN}/user/login`, {
       credentials: "include",
       method: "POST",
@@ -73,18 +49,25 @@ export default class Login extends Component<{}, ILogin> {
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.success) this.setState({ auth: true });
-        else this.setState({ loading: false });
+        if (data.success) {
+          temp = true;
+          authState.setLogin();
+        }
       })
       .catch((err) => {
+        console.log("Login Submit Error");
         console.log(err);
+      })
+      .finally(() => {
+        if (!temp) this.setState({ loading: false });
       });
-
-    event.preventDefault();
   };
 
   render() {
-    if (this.state.auth) return <Redirect to="/" />;
+    const { AuthState } = this.context;
+    const authState: IAuthState = AuthState;
+
+    if (authState.authenticated) return <Redirect to="*" />;
     return (
       <LoginLayout submit={this.submit}>
         <Heading textAlign="center" color="black" marginBottom={10}>
