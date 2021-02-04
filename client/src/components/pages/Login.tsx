@@ -10,7 +10,6 @@ import {
 } from "@chakra-ui/react";
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
-import { API_DOMAIN } from "../../util/consts";
 import AuthContext, { IAuthState } from "../context/AuthContext";
 
 interface ILogin {
@@ -24,6 +23,7 @@ export default class Login extends Component<{}, ILogin> {
 
   constructor(props: any) {
     super(props);
+
     this.state = {
       username: "",
       password: "",
@@ -36,31 +36,12 @@ export default class Login extends Component<{}, ILogin> {
 
     const { AuthState } = this.context;
     const authState: IAuthState = AuthState;
-
     let { username, password } = this.state;
-    // Willingly Ignoring Validation...
-    this.setState({ loading: true });
-    let temp = false;
-    await fetch(`${API_DOMAIN}/user/login`, {
-      credentials: "include",
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          temp = true;
-          authState.setLogin();
-        }
-      })
-      .catch((err) => {
-        console.log("Login Submit Error");
-        console.log(err);
-      })
-      .finally(() => {
-        if (!temp) this.setState({ loading: false });
-      });
+
+    const res = await authState.login(username, password);
+    if (!res) {
+      this.setState({ loading: false });
+    }
   };
 
   render() {
