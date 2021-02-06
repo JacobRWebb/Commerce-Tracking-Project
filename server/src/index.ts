@@ -5,7 +5,7 @@ import cors from "cors";
 import express from "express";
 import session from "express-session";
 import { createConnection, getConnection } from "typeorm";
-import { Session } from "./entities/Session";
+import { Session } from "./entities";
 import routes from "./routes";
 import FakeData from "./util/FakeData";
 
@@ -14,11 +14,12 @@ const PORT: number = parseInt(process.env.PORT);
 
 const generate = async () => {
   const connection = await createConnection();
-  const run = await connection.runMigrations({ transaction: "all" });
-  console.log(run);
+  const run = await connection
+    .runMigrations({ transaction: "all" })
+    .catch(() => {});
 
   await FakeData.generateUsers(10);
-  await FakeData.generateAlerts(400);
+  FakeData.generateAlerts(10000);
 };
 
 const main = async () => {
