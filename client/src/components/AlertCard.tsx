@@ -15,7 +15,7 @@ export interface IAlert {
   id: number;
   currentState: 0 | 1;
   file: string;
-  timeStamp: string;
+  timestamp: string;
 }
 
 const AlertCard: React.FC<{ alert: IAlert }> = ({ alert }) => {
@@ -56,7 +56,7 @@ const AlertCard: React.FC<{ alert: IAlert }> = ({ alert }) => {
         <Text isTruncated>{alert.file}</Text>
       </Box>
       <Stack direction={["column", "row"]} justify="space-between" padding={2}>
-        <Text textAlign="center">{moment(alert.timeStamp).fromNow()}</Text>
+        <Text textAlign="center">{moment(alert.timestamp).fromNow()}</Text>
         <Link to={`/alert/${alert.id}`}>
           <Button variant="outline" colorScheme="black">
             View

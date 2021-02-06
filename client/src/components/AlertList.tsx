@@ -9,6 +9,7 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import React, { Component } from "react";
+import ReactPaginate from "react-paginate";
 import { API_DOMAIN } from "../util/consts";
 import AlertCard, { IAlert } from "./AlertCard";
 
@@ -16,6 +17,10 @@ interface IAlertList {
   alerts: IAlert[];
   filter: 0 | 1 | 2;
   options: boolean;
+  perPage: number;
+  count: number;
+  skip: number;
+  page: number;
 }
 
 export default class AlertList extends Component<{}, IAlertList> {
@@ -25,21 +30,60 @@ export default class AlertList extends Component<{}, IAlertList> {
       alerts: [],
       filter: 2,
       options: false,
+      perPage: 0,
+      count: 0,
+      skip: 0,
+      page: 0,
     };
   }
 
   componentDidMount() {
-    fetch(`${API_DOMAIN}/alert`, { credentials: "include" })
+    this.getAlerts();
+  }
+
+  changePage = (selectedItem: { selected: number }) => {
+    this.setState(
+      {
+        page: selectedItem.selected,
+        skip: Math.floor(this.state.perPage * selectedItem.selected),
+      },
+      () => {
+        this.getAlerts();
+      }
+    );
+  };
+
+  changeFilter = (filter: 0 | 1 | 2) => {
+    this.setState({ filter }, () => {
+      this.getAlerts();
+    });
+  };
+
+  getAlerts = () => {
+    fetch(`${API_DOMAIN}/alert`, {
+      credentials: "include",
+      method: "POST",
+      body: JSON.stringify({
+        filter: this.state.filter,
+        skip: this.state.skip,
+      }),
+      headers: { "Content-Type": "application/json" },
+    })
       .then((result) => result.json())
       .then((data) => {
         if (data.success && data.alerts) {
-          this.setState({ alerts: data.alerts });
+          console.log(data);
+          this.setState({
+            alerts: data.alerts,
+            count: data.count,
+            perPage: data.perPage,
+          });
         }
       })
       .catch((err) => {
         console.log(err);
       });
-  }
+  };
 
   render() {
     return (
@@ -48,12 +92,16 @@ export default class AlertList extends Component<{}, IAlertList> {
           toggleOptions={() => this.setState({ options: !this.state.options })}
         >
           <FilterOptions
-            toggle={(selectedFilter: 0 | 1 | 2) =>
-              this.setState({ filter: selectedFilter })
-            }
+            toggle={this.changeFilter}
             options={this.state.options}
           />
         </AlertListHead>
+        <ReactPaginate
+          pageCount={Math.ceil(this.state.count / this.state.perPage)}
+          pageRangeDisplayed={2}
+          marginPagesDisplayed={2}
+          onPageChange={this.changePage}
+        />
         <SimpleGrid
           marginTop={8}
           spacing={[5, 5, 6, 6, 10]}

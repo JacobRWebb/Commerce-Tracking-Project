@@ -8,7 +8,6 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./components/context/AuthContext";
 import Navbar from "./components/Navbar";
-import AlertEdit from "./components/pages/AlertEdit";
 import Homepage from "./components/pages/Homepage";
 import { Background } from "./components/pages/Layout";
 import Login from "./components/pages/Login";
@@ -34,7 +33,6 @@ export default class App extends Component {
                 <Switch>
                   <Route path="/" exact component={Homepage} />
                   <Route path="/login" component={Login} />
-                  <Route path="/alert/:id" component={AlertEdit} />
                   <Redirect to="/" />
                 </Switch>
               </Router>
