@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import AuthContext, { IAuthState } from "./context/AuthContext";
+import AuthContext, { IAuthState, UserRoles } from "./context/AuthContext";
 
 interface INavBar {
   open: boolean;
@@ -47,6 +47,9 @@ export default class Navbar extends Component<{}, INavBar> {
           </Stack>
           <NavMenu open={this.state.open}>
             <NavItem to="/">Home</NavItem>
+            {authState.role === UserRoles.ADMIN && (
+              <NavItem to="/admin">Admin</NavItem>
+            )}
             {authState.authenticated && (
               <NavItem onClick={authState.logout}>Logout</NavItem>
             )}

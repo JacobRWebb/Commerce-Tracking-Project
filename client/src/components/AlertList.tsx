@@ -21,7 +21,9 @@ import React, { Component } from "react";
 import { API_DOMAIN } from "../util/consts";
 import AlertCard, { IAlert } from "./AlertCard";
 
-interface Props {}
+interface Props {
+  extended?: boolean;
+}
 
 interface State {
   alerts: IAlert[];
@@ -49,7 +51,7 @@ export default class AlertList extends Component<Props, State> {
         skip: 0,
       },
     };
-    this.fetchAlerts = lodash.debounce(this.fetchAlerts, 300);
+    this.fetchAlerts = lodash.debounce(this.fetchAlerts, 175);
   }
 
   componentDidMount() {
@@ -61,6 +63,7 @@ export default class AlertList extends Component<Props, State> {
       credentials: "include",
       method: "POST",
       body: JSON.stringify({
+        extended: this.props.extended,
         filter: this.state.filter,
         skip: this.state.meta.skip,
       }),
@@ -84,7 +87,7 @@ export default class AlertList extends Component<Props, State> {
       });
   };
 
-  changePage = (newPage: number) => {
+  changePage = (newPage: number, cb?: () => void) => {
     this.setState(
       (prevState) => ({
         meta: {
@@ -97,21 +100,36 @@ export default class AlertList extends Component<Props, State> {
         this.fetchAlerts();
       }
     );
+    if (cb) {
+      cb();
+    }
   };
+
+  // this.setState(
+  //   (prevState) => ({
+  //     filter,
+  //     meta: {
+  //       ...prevState.meta,
+  //       page: 1,
+  //     },
+  //   }),
+  //   () => this.fetchAlerts()
+  // )
 
   render() {
     return (
       <>
         <AlertHeading
+          extended={this.props.extended}
           toggle={() => this.setState({ filterOpen: !this.state.filterOpen })}
         >
           <AlertFilterList
             filterOpen={this.state.filterOpen}
-            toggle={(filter: 0 | 1 | 2) =>
-              this.setState({ filter }, () => {
-                this.fetchAlerts();
-              })
-            }
+            toggle={(filter: 0 | 1 | 2) => {
+              this.changePage(1, () => {
+                this.setState({ filter }, this.fetchAlerts);
+              });
+            }}
           />
         </AlertHeading>
         {this.state.alerts.length > 0 && (
@@ -142,14 +160,17 @@ export default class AlertList extends Component<Props, State> {
   }
 }
 
-const AlertHeading: React.FC<{ toggle: () => void }> = ({
+const AlertHeading: React.FC<{ toggle: () => void; extended?: boolean }> = ({
   children,
   toggle,
+  extended,
 }) => {
   return (
     <Box>
       <Stack justify="space-between" direction={["column", "row"]}>
-        <Heading textAlign={["center", "left"]}>Viewing Alert List</Heading>
+        <Heading textAlign={["center", "left"]}>
+          {extended ? "Admin Mode - Viewing All Alerts" : "Viewing Alert List"}
+        </Heading>
         <Button onClick={toggle}>
           <SearchIcon marginRight={1} />
           Filter

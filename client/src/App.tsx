@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./components/context/AuthContext";
 import Navbar from "./components/Navbar";
+import AdminPage from "./components/pages/AdminPage";
 import Homepage from "./components/pages/Homepage";
 import { Background } from "./components/pages/Layout";
 import Login from "./components/pages/Login";
@@ -32,6 +33,7 @@ export default class App extends Component {
                 <Navbar />
                 <Switch>
                   <Route path="/" exact component={Homepage} />
+                  <Route path="/admin" component={AdminPage} />
                   <Route path="/login" component={Login} />
                   <Redirect to="/" />
                 </Switch>
