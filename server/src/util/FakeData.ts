@@ -33,26 +33,26 @@ export default new (class FakeData {
     let application = Application.create({ identifier: "abc" });
     await application.save().catch(() => {});
 
-    let ackUser = User.create({ username: "ack-user", password: "ack-user" });
-    ackUser.save().catch(() => {});
+    let acceptUser = User.create({ username: "accept-demo", password: "demo" });
+    let save = await acceptUser.save().catch(() => {});
 
-    for (let i = 0; i < amount; i++) {
-      let currentState = faker.random.number(1);
-      let comment = currentState === 1 ? faker.lorem.sentence() : undefined;
-      let u = currentState === 1 ? ackUser : undefined;
-
-      let a = Alert.create({
-        currentState,
-        user: u,
-        comment,
-        application: application,
-        timestamp: faker.date.recent(365),
-        hostname: faker.internet.domainName(),
-        file: faker.system.filePath(),
-        change_agent: "system",
-        change_process: "system",
-      });
-      await a.save().catch(() => {});
+    if (save) {
+      for (let i = 0; i < amount; i++) {
+        let currentState = faker.random.number(1);
+        let comment = currentState === 1 ? faker.lorem.sentence() : undefined;
+        let alert = Alert.create({
+          currentState,
+          user: currentState === 1 ? save : undefined,
+          comment,
+          application: application,
+          timestamp: faker.date.recent(365),
+          hostname: faker.internet.domainName(),
+          file: faker.system.filePath(),
+          change_agent: "system",
+          change_process: "system",
+        });
+        await alert.save().catch(() => {});
+      }
     }
   };
 })();
