@@ -9,75 +9,64 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import React, { Component } from "react";
-import ReactPaginate from "react-paginate";
 import { API_DOMAIN } from "../util/consts";
 import AlertCard, { IAlert } from "./AlertCard";
 
-interface IAlertList {
+interface Props {}
+
+interface State {
   alerts: IAlert[];
   filter: 0 | 1 | 2;
-  options: boolean;
-  perPage: number;
-  count: number;
-  skip: number;
-  page: number;
+  filterOpen: boolean;
+  meta: {
+    count: number;
+    page: number;
+    perPage: number;
+    skip: number;
+  };
 }
 
-export default class AlertList extends Component<{}, IAlertList> {
+export default class AlertList extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
       alerts: [],
       filter: 2,
-      options: false,
-      perPage: 0,
-      count: 0,
-      skip: 0,
-      page: 0,
+      filterOpen: false,
+      meta: {
+        count: 0,
+        page: 0,
+        perPage: 100, // By Default
+        skip: 0,
+      },
     };
   }
 
   componentDidMount() {
-    this.getAlerts();
+    this.fetchAlerts();
   }
 
-  changePage = (selectedItem: { selected: number }) => {
-    this.setState(
-      {
-        page: selectedItem.selected,
-        skip: Math.floor(this.state.perPage * selectedItem.selected),
-      },
-      () => {
-        this.getAlerts();
-      }
-    );
-  };
-
-  changeFilter = (filter: 0 | 1 | 2) => {
-    this.setState({ filter }, () => {
-      this.getAlerts();
-    });
-  };
-
-  getAlerts = () => {
+  fetchAlerts = () => {
     fetch(`${API_DOMAIN}/alert`, {
       credentials: "include",
       method: "POST",
       body: JSON.stringify({
         filter: this.state.filter,
-        skip: this.state.skip,
+        skip: this.state.meta.skip,
       }),
       headers: { "Content-Type": "application/json" },
     })
       .then((result) => result.json())
       .then((data) => {
         if (data.success && data.alerts) {
-          console.log(data);
-          this.setState({
+          this.setState((prevState) => ({
             alerts: data.alerts,
-            count: data.count,
-            perPage: data.perPage,
-          });
+            meta: {
+              ...prevState.meta,
+              count: data.count,
+              perPage: data.perPage,
+            },
+          }));
         }
       })
       .catch((err) => {
@@ -85,44 +74,59 @@ export default class AlertList extends Component<{}, IAlertList> {
       });
   };
 
+  changePage = (selectedItem: { selected: number }) => {
+    this.setState(
+      (prevState) => ({
+        meta: {
+          ...prevState.meta,
+          page: selectedItem.selected,
+          skip: Math.floor(this.state.meta.perPage * selectedItem.selected),
+        },
+      }),
+      () => {
+        this.fetchAlerts();
+      }
+    );
+  };
+
   render() {
     return (
       <>
-        <AlertListHead
-          toggleOptions={() => this.setState({ options: !this.state.options })}
+        <AlertHeading
+          toggle={() => this.setState({ filterOpen: !this.state.filterOpen })}
         >
-          <FilterOptions
-            toggle={this.changeFilter}
-            options={this.state.options}
+          <AlertFilterList
+            filterOpen={this.state.filterOpen}
+            toggle={(filter: 0 | 1 | 2) =>
+              this.setState({ filter }, () => {
+                this.fetchAlerts();
+              })
+            }
           />
-        </AlertListHead>
-        <ReactPaginate
-          pageCount={Math.ceil(this.state.count / this.state.perPage)}
-          pageRangeDisplayed={2}
-          marginPagesDisplayed={2}
-          onPageChange={this.changePage}
-        />
+        </AlertHeading>
         <SimpleGrid
           marginTop={8}
           spacing={[5, 5, 6, 6, 10]}
           columns={[1, 2, 3, 3, 4, 5]}
         >
-          <FilteredList alerts={this.state.alerts} filter={this.state.filter} />
+          <DisplayAlerts alerts={this.state.alerts} />
         </SimpleGrid>
       </>
     );
   }
 }
 
-const AlertListHead: React.FC<{
-  toggleOptions: () => void;
-}> = ({ toggleOptions, children }) => {
+const AlertHeading: React.FC<{ toggle: () => void }> = ({
+  children,
+  toggle,
+}) => {
   return (
     <Box>
       <Stack justify="space-between" direction="row">
-        <Heading>Viewing Alert Listings</Heading>
-        <Button onClick={toggleOptions} overflow="hidden">
-          <SearchIcon marginRight={1} /> Filter
+        <Heading>Viewing Alert List</Heading>
+        <Button onClick={toggle}>
+          <SearchIcon marginRight={1} />
+          Filter
         </Button>
       </Stack>
       {children}
@@ -130,77 +134,48 @@ const AlertListHead: React.FC<{
   );
 };
 
-const FilterOptions: React.FC<{
-  options: boolean;
-  toggle: (selectedFilter: 0 | 1 | 2) => void;
-}> = ({ options, toggle }) => {
+const AlertFilterList: React.FC<{
+  filterOpen: boolean;
+  toggle: (filter: 0 | 1 | 2) => void;
+}> = ({ children, filterOpen, toggle }) => {
+  const { colorMode } = useColorMode();
   return (
-    <Box
-      display={options ? "block" : "none"}
-      width="100%"
-      marginTop={4}
-      borderRadius={3}
-      paddingTop={2}
-      paddingBottom={2}
-    >
+    <Box display={filterOpen ? "block" : "none"} width="100%" marginTop={4}>
       <Stack spacing={5} justify="space-evenly" direction={["column", "row"]}>
-        <FilterOptionButton
-          func={toggle}
-          value={2}
+        <Button
+          backgroundColor={colorMode === "light" ? "white" : "black"}
+          variant="outline"
+          onClick={() => toggle(2)}
           color={theme.colors.gray[500]}
         >
-          Filter Both
-        </FilterOptionButton>
-        <FilterOptionButton
-          func={toggle}
-          value={1}
+          View Both
+        </Button>
+        <Button
+          backgroundColor={colorMode === "light" ? "white" : "black"}
+          variant="outline"
+          onClick={() => toggle(1)}
           color={theme.colors.green[200]}
         >
-          Acknowledged
-        </FilterOptionButton>
-        <FilterOptionButton
-          func={toggle}
-          value={0}
+          View Acknowledged
+        </Button>
+        <Button
+          backgroundColor={colorMode === "light" ? "white" : "black"}
+          variant="outline"
+          onClick={() => toggle(0)}
           color={theme.colors.red[200]}
         >
-          Un-Acknowledged
-        </FilterOptionButton>
+          View Un-Acknowledged
+        </Button>
       </Stack>
     </Box>
   );
 };
 
-const FilterOptionButton: React.FC<{
-  func: (value: any) => void;
-  value: any;
-  color?: string;
-}> = ({ children, func, value, color = "black" }) => {
-  const { colorMode } = useColorMode();
-  return (
-    <Button
-      backgroundColor={colorMode === "light" ? "white" : "black"}
-      variant="outline"
-      onClick={() => func(value)}
-      color={color}
-      colorScheme={color}
-    >
-      {children}
-    </Button>
-  );
-};
-
-const FilteredList: React.FC<{ filter: number; alerts: IAlert[] }> = ({
-  filter,
-  alerts,
-}) => {
+const DisplayAlerts: React.FC<{ alerts: IAlert[] }> = ({ alerts }) => {
   return (
     <>
       {alerts.map((alert) => {
-        if (filter === 2 || filter === alert.currentState) {
-          return <AlertCard key={alert.id} alert={alert} />;
-        } else {
-          return null;
-        }
+        return <AlertCard key={alert.id} alert={alert} />;
       })}
     </>
   );
