@@ -46,7 +46,7 @@ export default new (class FakeData {
         user: u,
         comment,
         application: application,
-        timestamp: faker.date.recent(10),
+        timestamp: faker.date.recent(365),
         hostname: faker.internet.domainName(),
         file: faker.system.filePath(),
         change_agent: "system",

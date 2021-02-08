@@ -19,7 +19,7 @@ const generate = async () => {
     .catch(() => {});
 
   await FakeData.generateUsers(10);
-  FakeData.generateAlerts(10000);
+  FakeData.generateAlerts(50000);
 };
 
 const main = async () => {

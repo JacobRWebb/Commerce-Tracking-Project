@@ -7,9 +7,8 @@ import {
   Timestamp,
 } from "typeorm";
 import { Alert, UserRoles } from "../entities";
-
 export interface IAlertController {
-  getAll: (role: UserRoles, body: any) => Promise<[Alert[], number]>;
+  getAll: (role: UserRoles, body: any) => Promise<[Alert[], number] | void>;
   submit: (body: any) => Promise<void>;
 }
 
@@ -24,17 +23,17 @@ interface IExpectedAlert {
 
 const IAlertController: IAlertController = {
   getAll: async (role: UserRoles, body: any) => {
-    const { extended = false, skip = 0, filter = 2 } = body;
-    const perPage = 100;
+    const { extended = false, skip = 0, filter = 2, perPage = 100 } = body;
     const date = new Date();
     date.setDate(date.getDate() - 2);
 
-    let alerts: [Alert[], number];
+    let alerts: [Alert[], number] | void;
 
     const alertRepository = getConnection().getRepository(Alert);
     alerts = await alertRepository
-      .createQueryBuilder()
-      .orderBy({ timestamp: "DESC" })
+      .createQueryBuilder("alert")
+      .leftJoinAndSelect("alert.user", "user")
+      .orderBy("alert.timestamp", "DESC")
       .where({
         timestamp:
           role === UserRoles.ADMIN && extended
@@ -51,7 +50,10 @@ const IAlertController: IAlertController = {
       )
       .skip(skip)
       .take(perPage)
-      .getManyAndCount();
+      .getManyAndCount()
+      .catch((err) => {
+        console.error(err);
+      });
     return alerts;
   },
   submit: async (body: any) => {
