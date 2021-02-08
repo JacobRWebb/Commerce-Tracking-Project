@@ -3,6 +3,11 @@ import {
   Box,
   Button,
   Heading,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
   SimpleGrid,
   Stack,
   theme,
@@ -35,7 +40,7 @@ export default class AlertList extends Component<Props, State> {
       filterOpen: false,
       meta: {
         count: 0,
-        page: 0,
+        page: 1,
         perPage: 100, // By Default
         skip: 0,
       },
@@ -74,13 +79,13 @@ export default class AlertList extends Component<Props, State> {
       });
   };
 
-  changePage = (selectedItem: { selected: number }) => {
+  changePage = (newPage: number) => {
     this.setState(
       (prevState) => ({
         meta: {
           ...prevState.meta,
-          page: selectedItem.selected,
-          skip: Math.floor(this.state.meta.perPage * selectedItem.selected),
+          page: newPage,
+          skip: Math.floor(this.state.meta.perPage * (newPage - 1)),
         },
       }),
       () => {
@@ -104,6 +109,14 @@ export default class AlertList extends Component<Props, State> {
             }
           />
         </AlertHeading>
+        {this.state.alerts.length > 0 && (
+          <PageList
+            count={this.state.meta.count}
+            page={this.state.meta.page}
+            perPage={this.state.meta.perPage}
+            setPage={this.changePage}
+          />
+        )}
         <SimpleGrid
           marginTop={8}
           spacing={[5, 5, 6, 6, 10]}
@@ -111,6 +124,14 @@ export default class AlertList extends Component<Props, State> {
         >
           <DisplayAlerts alerts={this.state.alerts} />
         </SimpleGrid>
+        {this.state.alerts.length > 0 && (
+          <PageList
+            count={this.state.meta.count}
+            page={this.state.meta.page}
+            perPage={this.state.meta.perPage}
+            setPage={this.changePage}
+          />
+        )}
       </>
     );
   }
@@ -122,8 +143,8 @@ const AlertHeading: React.FC<{ toggle: () => void }> = ({
 }) => {
   return (
     <Box>
-      <Stack justify="space-between" direction="row">
-        <Heading>Viewing Alert List</Heading>
+      <Stack justify="space-between" direction={["column", "row"]}>
+        <Heading textAlign={["center", "left"]}>Viewing Alert List</Heading>
         <Button onClick={toggle}>
           <SearchIcon marginRight={1} />
           Filter
@@ -178,5 +199,51 @@ const DisplayAlerts: React.FC<{ alerts: IAlert[] }> = ({ alerts }) => {
         return <AlertCard key={alert.id} alert={alert} />;
       })}
     </>
+  );
+};
+
+const PageList: React.FC<{
+  page: number;
+  count: number;
+  perPage: number;
+  setPage: (page: number) => void;
+}> = ({ page, perPage, count, setPage }) => {
+  const totalPages = Math.ceil(count / perPage);
+  return (
+    <Stack
+      paddingTop={4}
+      paddingBottom={4}
+      direction={["column", "row"]}
+      justify="space-evenly"
+    >
+      <Button isDisabled={page <= 1} onClick={() => setPage(page - 1)}>
+        Previous
+      </Button>
+      <NumberInput
+        defaultValue={page}
+        value={page}
+        onChange={(v, n) => {
+          if (n > totalPages) {
+            setPage(totalPages);
+          } else if (n < 1) {
+            setPage(1);
+          } else {
+            setPage(n);
+          }
+        }}
+        min={1}
+        max={totalPages}
+        keepWithinRange={true}
+      >
+        <NumberInputField />
+        <NumberInputStepper>
+          <NumberIncrementStepper />
+          <NumberDecrementStepper />
+        </NumberInputStepper>
+      </NumberInput>
+      <Button isDisabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+        Next
+      </Button>
+    </Stack>
   );
 };
