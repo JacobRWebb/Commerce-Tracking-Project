@@ -10,9 +10,13 @@ import {
   NumberInputStepper,
   SimpleGrid,
   Stack,
+  Text,
   theme,
   useColorMode,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react";
+import lodash from "lodash";
 import React, { Component } from "react";
 import { API_DOMAIN } from "../util/consts";
 import AlertCard, { IAlert } from "./AlertCard";
@@ -45,6 +49,7 @@ export default class AlertList extends Component<Props, State> {
         skip: 0,
       },
     };
+    this.fetchAlerts = lodash.debounce(this.fetchAlerts, 300);
   }
 
   componentDidMount() {
@@ -209,6 +214,7 @@ const PageList: React.FC<{
   setPage: (page: number) => void;
 }> = ({ page, perPage, count, setPage }) => {
   const totalPages = Math.ceil(count / perPage);
+  const { colorMode } = useColorMode();
   return (
     <Stack
       paddingTop={4}
@@ -219,28 +225,38 @@ const PageList: React.FC<{
       <Button isDisabled={page <= 1} onClick={() => setPage(page - 1)}>
         Previous
       </Button>
-      <NumberInput
-        defaultValue={page}
-        value={page}
-        onChange={(v, n) => {
-          if (n > totalPages) {
-            setPage(totalPages);
-          } else if (n < 1) {
-            setPage(1);
-          } else {
-            setPage(n);
-          }
-        }}
-        min={1}
-        max={totalPages}
-        keepWithinRange={true}
-      >
-        <NumberInputField />
-        <NumberInputStepper>
-          <NumberIncrementStepper />
-          <NumberDecrementStepper />
-        </NumberInputStepper>
-      </NumberInput>
+      <Wrap align="center">
+        <WrapItem>
+          <NumberInput
+            overflow="hidden"
+            backgroundColor={colorMode === "light" ? "white" : "black"}
+            borderRadius={5}
+            defaultValue={page}
+            value={page}
+            onChange={(v, n) => {
+              if (n > totalPages) {
+                setPage(totalPages);
+              } else if (n < 1) {
+                setPage(1);
+              } else {
+                setPage(n);
+              }
+            }}
+            min={1}
+            max={totalPages}
+            keepWithinRange={true}
+          >
+            <NumberInputField />
+            <NumberInputStepper>
+              <NumberIncrementStepper />
+              <NumberDecrementStepper />
+            </NumberInputStepper>
+          </NumberInput>
+        </WrapItem>
+        <WrapItem>
+          <Text marginLeft={1}>/ {totalPages}</Text>
+        </WrapItem>
+      </Wrap>
       <Button isDisabled={page >= totalPages} onClick={() => setPage(page + 1)}>
         Next
       </Button>
