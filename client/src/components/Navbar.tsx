@@ -36,7 +36,7 @@ export default class Navbar extends Component<{}, INavBar> {
     return (
       <Box
         paddingTop={9}
-        paddingBottom={9}
+        paddingBottom={1}
         paddingLeft={["10%"]}
         paddingRight={["10%"]}
       >
@@ -46,9 +46,7 @@ export default class Navbar extends Component<{}, INavBar> {
             <NavToggle open={this.state.open} toggle={this.toggleNav} />
           </Stack>
           <NavMenu open={this.state.open}>
-            <Link to="/">
-              <NavItem>Home</NavItem>
-            </Link>
+            <NavItem to="/">Home</NavItem>
             {authState.authenticated && (
               <NavItem onClick={authState.logout}>Logout</NavItem>
             )}
@@ -111,7 +109,11 @@ const NavMenu: React.FC<{ open: boolean }> = ({ children, open }) => {
   );
 };
 
-const NavItem: React.FC<{ onClick?: () => void }> = ({ children, onClick }) => {
+const NavItem: React.FC<{ onClick?: () => void; to?: string }> = ({
+  children,
+  onClick,
+  to = "/",
+}) => {
   const { colorMode } = useColorMode();
   return (
     <Box
@@ -125,19 +127,36 @@ const NavItem: React.FC<{ onClick?: () => void }> = ({ children, onClick }) => {
       color={colorMode === "light" ? "black" : "white"}
       marginRight={["", 1, 2, 3]}
       width={["100%", "unset"]}
-      textAlign={["center"]}
     >
-      <Button
-        paddingTop={1}
-        paddingRight={[1, 3, 5]}
-        paddingLeft={[1, 3, 5]}
-        paddingBottom={1}
-        variant="link"
-        display="block"
-        onClick={onClick !== null ? onClick : undefined}
-      >
-        {children}
-      </Button>
+      {to !== null ? (
+        <Button
+          paddingTop={1}
+          paddingRight={[1, 3, 5]}
+          paddingLeft={[1, 3, 5]}
+          paddingBottom={1}
+          variant="link"
+          display="block"
+          onClick={onClick !== null ? onClick : undefined}
+          textAlign={["center"]}
+          as={Link}
+          to={to}
+        >
+          {children}
+        </Button>
+      ) : (
+        <Button
+          paddingTop={1}
+          paddingRight={[1, 3, 5]}
+          paddingLeft={[1, 3, 5]}
+          paddingBottom={1}
+          variant="link"
+          display="block"
+          onClick={onClick !== null ? onClick : undefined}
+          textAlign={["center"]}
+        >
+          {children}
+        </Button>
+      )}
     </Box>
   );
 };
