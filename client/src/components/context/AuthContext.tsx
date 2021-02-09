@@ -7,6 +7,12 @@ export enum UserRoles {
   GUEST = "guest",
 }
 
+export interface IUser {
+  id: number;
+  role: UserRoles;
+  username: string;
+}
+
 export interface IAuthState {
   checking: boolean;
   authenticated: boolean;

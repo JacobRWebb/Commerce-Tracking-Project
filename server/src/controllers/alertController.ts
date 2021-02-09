@@ -8,7 +8,12 @@ import {
 } from "typeorm";
 import { Alert, UserRoles } from "../entities";
 export interface IAlertController {
-  getAll: (role: UserRoles, body: any) => Promise<[Alert[], number] | void>;
+  getAll: (
+    role: UserRoles,
+    filter: 0 | 1 | 2,
+    meta: { rowsPerPage: number; offset: number },
+    extended: boolean
+  ) => Promise<[Alert[], number] | void>;
   submit: (body: any) => Promise<void>;
 }
 
@@ -22,8 +27,12 @@ interface IExpectedAlert {
 }
 
 const IAlertController: IAlertController = {
-  getAll: async (role: UserRoles, body: any) => {
-    const { extended = false, skip = 0, filter = 2, perPage = 100 } = body;
+  getAll: async (
+    role: UserRoles,
+    filter: 0 | 1 | 2,
+    meta: { rowsPerPage: number; offset: number },
+    extended: boolean
+  ) => {
     const date = new Date();
     date.setDate(date.getDate() - 2);
 
@@ -48,8 +57,8 @@ const IAlertController: IAlertController = {
           return qb.where({ currentState: filter });
         })
       )
-      .skip(skip)
-      .take(perPage)
+      .skip(meta.offset)
+      .take(meta.rowsPerPage)
       .getManyAndCount()
       .catch((err) => {
         console.error(err);

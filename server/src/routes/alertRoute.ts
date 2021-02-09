@@ -5,12 +5,27 @@ import { IsAuth } from "../middleware/Auth";
 
 const router = Router();
 
+export interface IExpectedAlertList {
+  filter?: 0 | 1 | 2;
+  extended: boolean;
+  meta?: {
+    rowsPerPage: number;
+    offset: number;
+  };
+}
+
 router.post("/", IsAuth, async (req, res) => {
   const { role } = req.session._user!;
-  const { perPage = 100 } = req.body;
+  const {
+    filter = 2,
+    extended = false,
+    meta = { rowsPerPage: 50, offset: 0 },
+  }: IExpectedAlertList = req.body;
   const alertResponse: [Alert[], number] | void = await AlertController.getAll(
     role,
-    req.body
+    filter,
+    meta,
+    extended
   );
   if (!alertResponse) {
     return res.json({ success: false });
@@ -19,7 +34,7 @@ router.post("/", IsAuth, async (req, res) => {
     success: true,
     alerts: alertResponse[0],
     count: alertResponse[1],
-    perPage,
+    rowsPerPage: meta.rowsPerPage,
   });
 });
 

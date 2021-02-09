@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
-import AlertList from "../AlertList";
+import AlertList from "../alert/AlertList";
 import AuthContext, { IAuthState, UserRoles } from "../context/AuthContext";
 import Layout from "./Layout";
 
