@@ -78,7 +78,11 @@ const AlertCard: React.FC<Props> = ({ alert, openModal }) => {
           <Text textAlign="center">{moment(alert.timestamp).fromNow()}</Text>
         </WrapItem>
         <WrapItem>
-          <Button onClick={() => {}} variant="outline" colorScheme="black">
+          <Button
+            onClick={() => openModal(alert)}
+            variant="outline"
+            colorScheme="black"
+          >
             View
           </Button>
         </WrapItem>

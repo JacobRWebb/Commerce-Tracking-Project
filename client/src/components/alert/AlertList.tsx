@@ -14,6 +14,7 @@ import lodash from "lodash";
 import React, { Component } from "react";
 import { API_DOMAIN } from "../../util/consts";
 import AlertCard, { IAlert } from "./AlertCard";
+import AlertModal from "./AlertModal";
 import Pagination from "./Pagination";
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
 }
 interface State {
   alerts: IAlert[];
+  modalAlert?: IAlert;
   extended: boolean;
   filter: 0 | 1 | 2;
   filterOpen: boolean;
@@ -173,12 +175,14 @@ export default class AlertList extends Component<Props, State> {
               </FilterButton>
             </Stack>
           </Box>
-          <Pagination
-            page={this.state.meta.page}
-            totalPages={this.state.meta.totalPages}
-            rows={this.state.meta.rows}
-            setPage={this.setPage}
-          />
+          {this.state.alerts.length > 0 && (
+            <Pagination
+              page={this.state.meta.page}
+              totalPages={this.state.meta.totalPages}
+              rows={this.state.meta.rows}
+              setPage={this.setPage}
+            />
+          )}
           <SimpleGrid
             marginTop={8}
             spacing={[5, 5, 6, 6, 10]}
@@ -186,11 +190,24 @@ export default class AlertList extends Component<Props, State> {
           >
             {this.state.alerts?.map((alert) => {
               return (
-                <AlertCard key={alert.id} alert={alert} openModal={() => {}} />
+                <AlertCard
+                  key={alert.id}
+                  alert={alert}
+                  openModal={(alert: IAlert) =>
+                    this.setState({ modalAlert: alert })
+                  }
+                />
               );
             })}
           </SimpleGrid>
         </>
+        {this.state.modalAlert && (
+          <AlertModal
+            alert={this.state.modalAlert}
+            isOpen={true}
+            onClose={() => this.setState({ modalAlert: undefined })}
+          />
+        )}
       </>
     );
   }
