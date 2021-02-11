@@ -1,4 +1,4 @@
-import { Box, ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider } from "@chakra-ui/react";
 import React, { Component } from "react";
 import {
   BrowserRouter as Router,
@@ -17,32 +17,22 @@ import Toggle from "./components/Toggle";
 export default class App extends Component {
   render() {
     return (
-      <AuthProvider>
-        <ChakraProvider>
-          <Background>
-            <Box
-              className="App"
-              overflowX="scroll"
-              overflowY="hidden"
-              height="100%"
-              width="100%"
-              minHeight="100vh"
-              minWidth="100vw"
-            >
-              <Router>
-                <Navbar />
-                <Switch>
-                  <Route path="/" exact component={Homepage} />
-                  <Route path="/admin" component={AdminPage} />
-                  <Route path="/login" component={Login} />
-                  <Redirect to="/" />
-                </Switch>
-              </Router>
-              <Toggle />
-            </Box>
-          </Background>
-        </ChakraProvider>
-      </AuthProvider>
+      <ChakraProvider>
+        <Background>
+          <AuthProvider>
+            <Router>
+              <Navbar />
+              <Switch>
+                <Route path="/" exact component={Homepage} />
+                <Route path="/admin" component={AdminPage} />
+                <Route path="/login" component={Login} />
+                <Redirect to="/" />
+              </Switch>
+            </Router>
+            <Toggle />
+          </AuthProvider>
+        </Background>
+      </ChakraProvider>
     );
   }
 }

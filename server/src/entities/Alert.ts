@@ -28,7 +28,7 @@ export class Alert extends BaseEntity {
   @Column({ nullable: false })
   hostname: string;
 
-  @ManyToOne(() => User, (user) => user.acknowledged_alerts)
+  @ManyToOne(() => User, (user) => user.acknowledged_alerts, { eager: true })
   user: User;
 
   @ManyToOne(() => Application, (application) => application.alerts)

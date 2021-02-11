@@ -1,5 +1,6 @@
 import {
   Button,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -7,11 +8,16 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Stack,
+  StackItem,
   Text,
   Tooltip,
 } from "@chakra-ui/react";
+import { debounce } from "lodash";
 import moment from "moment";
 import React, { Component } from "react";
+import { API_DOMAIN } from "../../util/consts";
+import AuthContext, { IAuthState } from "../context/AuthContext";
 import { IAlert } from "./AlertCard";
 
 interface Props {
@@ -20,10 +26,60 @@ interface Props {
   onClose: () => void;
 }
 
-interface State {}
+interface State {
+  id: number;
+  newState: 0 | 1;
+  comment: string;
+}
 
 export default class AlertModal extends Component<Props, State> {
-  state = {};
+  static contextType = AuthContext;
+
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      id: this.props.alert.id,
+      newState: 1,
+      comment: "",
+    };
+
+    this.setComment = debounce(this.setComment, 200);
+  }
+
+  setComment = (comment: string) => {
+    this.setState({ comment });
+  };
+
+  submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const { AuthState } = this.context;
+    const authState: IAuthState = AuthState;
+
+    fetch(`${API_DOMAIN}/alert/edit/`, {
+      credentials: "include",
+      method: "POST",
+      body: JSON.stringify(this.state),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((result) => {
+        if (result.status !== 200)
+          throw new Error("Server did not respond with 200.");
+        return result.json();
+      })
+      .then((data) => {
+        if (!data.success) {
+          if (data.auth === undefined) {
+            throw new Error("Unable to update.");
+          } else {
+            authState.logout();
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   render() {
     const alert: IAlert = this.props.alert;
@@ -54,9 +110,26 @@ export default class AlertModal extends Component<Props, State> {
             <Text>Timestamp: {moment(alert.timestamp).fromNow()}</Text>
           </ModalBody>
           <ModalFooter>
-            <Tooltip hasArrow label="Not Complete">
-              <Button colorScheme="blue">Edit Alert</Button>
-            </Tooltip>
+            {this.props.alert.currentState === 0 && (
+              <form onSubmit={this.submit} style={{ width: "100%" }}>
+                <Stack direction="row" justify="space-between">
+                  <StackItem>
+                    <Input
+                      placeholder="Leave a comment..."
+                      onChange={(event) => this.setComment(event.target.value)}
+                      isRequired
+                    ></Input>
+                  </StackItem>
+                  <StackItem>
+                    <Tooltip hasArrow label="Not Complete">
+                      <Button type="submit" colorScheme="green">
+                        Verify Alert
+                      </Button>
+                    </Tooltip>
+                  </StackItem>
+                </Stack>
+              </form>
+            )}
           </ModalFooter>
         </ModalContent>
       </Modal>

@@ -40,10 +40,10 @@ export class AuthProvider extends Component<{}, IAuthState> {
     fetch(`${API_DOMAIN}/user/`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
-        if (data.reqUser) {
+        if (data.user) {
           this.setState({
             authenticated: data.success,
-            role: data.reqUser.role,
+            role: data.user.role,
           });
         }
       })
@@ -64,9 +64,10 @@ export class AuthProvider extends Component<{}, IAuthState> {
       headers: { "Content-Type": "application/json" },
     }).then((data) => data.json());
     if (loginResponse.success) {
+      console.log(loginResponse);
       this.setState({
         authenticated: true,
-        role: loginResponse.reqUser.role,
+        role: loginResponse.user.role,
       });
       return true;
     }

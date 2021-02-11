@@ -5,6 +5,7 @@ export const Background: React.FC = ({ children }) => {
   const { colorMode } = useColorMode();
   return (
     <Box
+      className="App"
       backgroundColor={colorMode === "light" ? "white" : theme.colors.gray[800]}
       backgroundImage={
         colorMode === "light"
@@ -14,6 +15,10 @@ export const Background: React.FC = ({ children }) => {
       backgroundSize={colorMode === "light" ? "25px 25px" : "75px 75px"}
       backgroundPosition="-19px -19px"
       overflowX="hidden"
+      height="100%"
+      minHeight="100vh"
+      width="100%"
+      minWidth="100%"
     >
       {children}
     </Box>

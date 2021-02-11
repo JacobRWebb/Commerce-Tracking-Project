@@ -1,90 +1,56 @@
-import {
-  Brackets,
-  getConnection,
-  IsNull,
-  MoreThanOrEqual,
-  Not,
-  Timestamp,
-} from "typeorm";
-import { Alert, UserRoles } from "../entities";
-export interface IAlertController {
-  getAll: (
-    role: UserRoles,
-    filter: 0 | 1 | 2,
-    meta: { rowsPerPage: number; offset: number },
-    extended: boolean
-  ) => Promise<[Alert[], number] | void>;
-  submit: (body: any) => Promise<void>;
-}
+import { IsNull, MoreThanOrEqual, Not } from "typeorm";
+import { Alert, User, UserRoles } from "../entities";
 
-interface IExpectedAlert {
-  timestamp: Timestamp;
-  hostname: string;
-  application_id: string;
-  file: string;
-  change_agent: string;
-  change_process: string;
-}
+//   editAlert: async (
+//     alertId: number,
+//     user: User | undefined,
+//     changes: { comment: string; newState: 0 | 1 }
+//   ) => {
+//     let alert = await Alert.findOne({ where: { id: alertId } });
+//     if (alert) {
+//       alert.currentState = changes.newState;
+//       if (changes.newState === 1) {
+//         if (user) {
+//           alert.user = user;
+//         }
+//         alert.comment = changes.comment;
+//       }
+//       await alert.save();
+//       return alert;
+//     }
+//     return false;
+//   },
+// };
 
-const IAlertController: IAlertController = {
-  getAll: async (
-    role: UserRoles,
+// export default IAlertController;
+
+const AlertController = {
+  fetchAll: async (
+    user: User,
     filter: 0 | 1 | 2,
-    meta: { rowsPerPage: number; offset: number },
-    extended: boolean
+    extended: boolean,
+    rowsPerPage: number,
+    offset: number
   ) => {
     const date = new Date();
     date.setDate(date.getDate() - 2);
 
     let alerts: [Alert[], number] | void;
 
-    const alertRepository = getConnection().getRepository(Alert);
-    alerts = await alertRepository
-      .createQueryBuilder("alert")
-      .leftJoinAndSelect("alert.user", "user")
-      .orderBy("alert.timestamp", "DESC")
-      .where({
+    alerts = await Alert.findAndCount({
+      where: {
         timestamp:
-          role === UserRoles.ADMIN && extended
+          user.role === UserRoles.ADMIN && extended
             ? Not(IsNull())
             : MoreThanOrEqual(date.toISOString()),
-      })
-      .andWhere(
-        new Brackets((qb) => {
-          if (filter === 2) {
-            return qb.where({ currentState: Not(2) });
-          }
-          return qb.where({ currentState: filter });
-        })
-      )
-      .skip(meta.offset)
-      .take(meta.rowsPerPage)
-      .getManyAndCount()
-      .catch((err) => {
-        console.error(err);
-      });
-    return alerts;
-  },
-  submit: async (body: any) => {
-    //  Ignoring Validation for right now...
-    let {
-      application_id,
-      timestamp,
-      change_agent,
-      change_process,
-      file,
-      hostname,
-    }: IExpectedAlert = body;
-    const alert = Alert.create({
-      change_agent,
-      change_process,
-      file,
-      hostname,
-      timestamp,
+        currentState: filter === 2 ? Not(2) : filter,
+      },
+      skip: offset,
+      take: rowsPerPage,
     });
 
-    await alert.save();
+    return alerts;
   },
 };
 
-export default IAlertController;
+export default AlertController;

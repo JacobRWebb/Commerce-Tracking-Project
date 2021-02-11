@@ -9,7 +9,7 @@ router.use("/user", UserRoute);
 router.use("/alert", AlertRoute);
 
 //  Fallback Route
-router.get("/", (req, res) => {
+router.all("/", (_req, res) => {
   res.json({ info: "API Endpoint" });
 });
 

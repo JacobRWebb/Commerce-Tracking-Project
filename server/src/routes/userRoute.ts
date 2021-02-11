@@ -1,26 +1,28 @@
 import { Router } from "express";
-import { User } from "../entities";
-import { IsAuth } from "../middleware/Auth";
+import { UserController } from "../controllers";
+import { Auth } from "../middleware";
 
 const router = Router();
 
-declare module "express-session" {
-  interface SessionData {
-    _user?: User;
-  }
-}
-
-router.get("/", IsAuth, (req, res) => {
-  res.json({ success: true, reqUser: req.session._user });
+router.get("/", Auth.IsAuth, (req, res) => {
+  res.json({ success: true, user: req.session._user });
 });
 
 router.post("/login", async (req, res) => {
-  //  Willingly Ignoring input Validation...
+  //  [TODO] Setup Validation, Ignoring for now.
   let { username, password } = req.body;
-  let user = await User.findOne({ where: { username, password } });
-  if (!user) return res.json({ success: false, user, username, password });
-  req.session._user = user;
-  return res.json({ success: true, reqUser: req.session._user, user });
+
+  const user = await UserController.login(username, password);
+
+  if (user) {
+    req.session._user = user;
+    return res.json({ success: true, user });
+  }
+
+  return res.json({
+    success: false,
+    info: "Unable to find user account with those details",
+  });
 });
 
 router.all("/logout", async (req, res) => {
