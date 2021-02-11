@@ -1,5 +1,7 @@
 # UCMO Spring 2021 Commerce Bank Project - Revision
 
+## Before Beginning follow these [Instructions](Installation.md)
+
 ### Attempt to cleanup and define a clear set of instructions from the original given instruction set.
 
 # Alert Tracking and Acknowledgement System (ATAS)
@@ -10,18 +12,10 @@ ATAS will present a list of alerts to authenticated users that fall within two s
 
 ## Goals
 
-### Frontend
-
-- [x] Display alert list
-- [x] Prompt user to edit alert
+- [x] Display Alerts
+- [x] Edit Prompt
 - [x] Login
 - [x] Admin Dashboard
-
-### Backend
-
-- [ ] Alert API (Retrieve, Edit)
-- [x] Login API
-
-## Extra Goals
-
-- [ ] System sends out emails when alerts have not be acknowledge in 2 days and as new alerts arrive.
+- [x] Alert API - \[Fetch Alerts, Edit Alert, Submit Alert\]
+- [x] Login API - \[Login, Logout\]
+- [ ] \(Optional) System sends out an email when alert has not been acknowledged within 2 days.
