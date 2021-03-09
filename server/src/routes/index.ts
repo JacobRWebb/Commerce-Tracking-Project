@@ -8,9 +8,8 @@ router.use("/user", UserRoute);
 
 router.use("/alert", AlertRoute);
 
-//  Fallback Route
 router.all("/", (_req, res) => {
-  res.json({ info: "API Endpoint" });
+  res.json({ info: "API Endpoint " });
 });
 
 export default router;

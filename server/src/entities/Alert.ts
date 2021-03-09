@@ -8,40 +8,51 @@ import {
   Timestamp,
   UpdateDateColumn,
 } from "typeorm";
-import { Application } from "./Application";
 import { User } from "./User";
+
+export enum AlertStatus {
+  ALL = "all",
+  ACKNOWLEDGED = "acknowledged",
+  UNACKNOWLEDGED = "un-acknowledged",
+  DECLINED = "declined",
+}
 
 @Entity()
 export class Alert extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: number;
 
-  @Column({ default: 0, nullable: true })
-  currentState: number;
-
-  @Column({ nullable: true })
-  comment: string;
+  @Column({
+    type: "enum",
+    enum: AlertStatus,
+    default: AlertStatus.UNACKNOWLEDGED,
+  })
+  status: AlertStatus;
 
   @Column("timestamp", { default: new Date().toISOString() })
   timestamp: Timestamp;
 
-  @Column({ nullable: false })
-  hostname: string;
-
-  @ManyToOne(() => User, (user) => user.acknowledged_alerts, { eager: true })
+  @ManyToOne(() => User, (user) => user.manageAlerts, {
+    eager: true,
+    onDelete: "SET NULL",
+    nullable: true,
+  })
   user: User;
 
-  @ManyToOne(() => Application, (application) => application.alerts)
-  application: Application;
+  @Column({ nullable: true })
+  comment: string;
 
-  @Column({ nullable: false })
+  @Column()
+  hostname: string;
+
+  @Column()
   file: string;
 
-  @Column({ nullable: false })
-  change_agent: string;
+  @Column()
+  changeAgent: string;
 
-  @Column({ nullable: false })
-  change_process: string;
+  @Column()
+  changeProcess: string;
 
   @CreateDateColumn()
   createdAt: Timestamp;

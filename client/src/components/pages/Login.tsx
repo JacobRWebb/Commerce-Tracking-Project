@@ -10,45 +10,57 @@ import {
 } from "@chakra-ui/react";
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
-import AuthContext, { IAuthState } from "../context/AuthContext";
+import { API_DOMAIN } from "../../util/consts";
+import { AuthContext, AuthState } from "../context";
 
 interface ILogin {
   username: string;
   password: string;
   loading: boolean;
+  redirect: boolean;
 }
 
 export default class Login extends Component<{}, ILogin> {
   static contextType = AuthContext;
 
-  constructor(props: any) {
+  constructor(props: any, context: AuthState) {
     super(props);
 
     this.state = {
       username: "",
       password: "",
       loading: false,
+      redirect: false,
     };
   }
 
   submit = async (event: React.FormEvent) => {
+    const context: AuthState = this.context;
+
     event.preventDefault();
 
-    const { AuthState } = this.context;
-    const authState: IAuthState = AuthState;
     let { username, password } = this.state;
-
-    const res = await authState.login(username, password);
-    if (!res) {
-      this.setState({ loading: false });
-    }
+    fetch(`${API_DOMAIN}/user/login`, {
+      credentials: "include",
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((result) => {
+        if (result.status === 403) return this.setState({ redirect: true });
+        if (result.status === 200) return result.json();
+      })
+      .then((data) => {
+        if (data.success && data.role) {
+          context.update(data.success, data.role);
+        }
+      })
+      .catch(() => {});
   };
 
   render() {
-    const { AuthState } = this.context;
-    const authState: IAuthState = AuthState;
-
-    if (authState.authenticated) return <Redirect to="*" />;
+    const context: AuthState = this.context;
+    if (this.state.redirect || context.auth) return <Redirect to="/" />;
     return (
       <LoginLayout submit={this.submit}>
         <Heading textAlign="center" color="black" marginBottom={10}>

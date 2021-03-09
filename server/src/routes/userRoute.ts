@@ -1,22 +1,24 @@
-import { Router } from "express";
+import { Response, Router } from "express";
 import { UserController } from "../controllers";
 import { Auth } from "../middleware";
 
 const router = Router();
 
-router.get("/", Auth.IsAuth, (req, res) => {
-  res.json({ success: true, user: req.session._user });
+router.get("/", Auth.IsAuth, (_req, res: Response) => {
+  res.json({ success: true, user: res._User });
 });
 
-router.post("/login", async (req, res) => {
-  //  [TODO] Setup Validation, Ignoring for now.
+router.post("/login", Auth.nonLogged, async (req, res) => {
   let { username, password } = req.body;
 
-  const user = await UserController.login(username, password);
+  const check = await UserController.login(username, password);
 
-  if (user) {
-    req.session._user = user;
-    return res.json({ success: true, user });
+  if (check) {
+    const { token, user } = check;
+    return res.status(200).cookie("token", token, { httpOnly: true }).json({
+      success: true,
+      role: user.role,
+    });
   }
 
   return res.json({
@@ -25,9 +27,15 @@ router.post("/login", async (req, res) => {
   });
 });
 
-router.all("/logout", async (req, res) => {
-  req.session.destroy(() => {});
-  res.json({ success: true });
+router.all("/logout", Auth.IsAuth, async (_req, res) => {
+  if (res._User) {
+    UserController.logout(res._User.username);
+  }
+
+  return res
+    .status(200)
+    .cookie("token", "", { expires: new Date(), maxAge: 0 })
+    .json({});
 });
 
 export default router;

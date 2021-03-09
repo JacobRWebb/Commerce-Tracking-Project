@@ -1,26 +1,15 @@
 import React, { Component } from "react";
-import { Redirect } from "react-router-dom";
-import AlertList from "../alert/AlertList";
-import AuthContext, { IAuthState } from "../context/AuthContext";
-import Layout from "./Layout";
+import Table from "../Alert/Table";
 
-export default class Homepage extends Component {
-  static contextType = AuthContext;
+interface Props {}
+interface State {}
 
+export default class Homepage extends Component<Props, State> {
   render() {
-    if (!this.context) return <></>;
-
-    const { AuthState } = this.context;
-    const authState: IAuthState = AuthState;
-
-    if (!authState.authenticated) return <Redirect to="/login" />;
-
     return (
-      <>
-        <Layout>
-          <AlertList />
-        </Layout>
-      </>
+      <div>
+        <Table />
+      </div>
     );
   }
 }

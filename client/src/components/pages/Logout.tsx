@@ -1,26 +1,24 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import { API_DOMAIN } from "../../util/consts";
+import { AuthContext, AuthState, UserRole } from "../context";
 
-export default class Logout extends Component<{}, { loggingOut: boolean }> {
-  constructor(props: any) {
-    super(props);
-    this.state = {
-      loggingOut: true,
-    };
-  }
+export default class Logout extends Component {
+  static contextType = AuthContext;
+
   componentDidMount() {
+    const context: AuthState = this.context;
+
     fetch(`${API_DOMAIN}/user/logout`, { credentials: "include" })
       .finally(() => {
-        this.setState({ loggingOut: false });
+        context.update(false, UserRole.GUEST);
       })
       .catch(() => {
-        console.log("Something went wrong somehow.");
+        //
       });
   }
 
   render() {
-    if (this.state.loggingOut) return <></>;
-    else return <Redirect to="/" />;
+    return <Redirect to="/login" />;
   }
 }

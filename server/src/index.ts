@@ -3,7 +3,7 @@ import express from "express";
 import { establishConnection } from "./entities";
 import { applyMiddleware, preMiddleware } from "./middleware";
 import routes from "./routes";
-import { DataGenerator } from "./util";
+import { generate } from "./util";
 const app = express();
 const PORT: number = parseInt(process.env.PORT) || 5000;
 
@@ -17,9 +17,9 @@ main()
     app.use(routes);
 
     app.listen(PORT, () => {
-      const dataGenerator = new DataGenerator();
-      dataGenerator.demo();
-      console.log(`Server is running.\nhttp://localhost:${PORT}/`);
+      console.log(`\nServer is running.\nhttp://localhost:${PORT}/\n`);
     });
+
+    generate();
   })
   .catch((err) => console.log(err));

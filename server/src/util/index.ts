@@ -1,1 +1,1 @@
-export { default as DataGenerator } from "./DataGenerator";
+export { generate } from "./DataGenerator";
