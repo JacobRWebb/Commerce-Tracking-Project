@@ -5,8 +5,9 @@ import { Alert, AlertStatus, User, UserRole } from "../entities";
 export const generate = async () => {
   const connection = getConnection();
   if (!connection) return;
-  await User.delete({});
-  await Alert.delete({});
+
+  await User.delete({}).catch(() => {});
+  await Alert.delete({}).catch(() => {});
 
   let users: User[] = [
     User.create({ username: "admin", password: "admin", role: UserRole.ADMIN }),
@@ -35,62 +36,62 @@ export const generate = async () => {
 };
 
 const loopCreate = async () => {
-  const connection = getConnection();
-  if (!connection) return;
+  try {
+    const connection = getConnection();
+    if (!connection) return;
 
-  let users = await User.find({});
-  let alerts: Alert[] = [];
-  users;
-  alerts;
+    let users = await User.find({});
+    let alerts: Alert[] = [];
 
-  for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
-    alerts.push(
-      Alert.create({
-        status: AlertStatus.ACKNOWLEDGED,
-        user: users[Math.floor(Math.random() * users.length) + 1],
-        comment: lorem.sentence(),
-        timestamp: date.recent(365),
-        hostname: internet.domainName(),
-        file: system.filePath(),
-        changeAgent: internet.userAgent(),
-        changeProcess: git.branch(),
-      })
-    );
-  }
+    for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
+      alerts.push(
+        Alert.create({
+          status: AlertStatus.ACKNOWLEDGED,
+          user: users[Math.floor(Math.random() * users.length) + 1],
+          comment: lorem.sentence(),
+          timestamp: date.recent(Math.floor(Math.random() * 365) + 1),
+          hostname: internet.domainName(),
+          file: system.filePath(),
+          changeAgent: internet.userAgent(),
+          changeProcess: git.branch(),
+        })
+      );
+    }
 
-  for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
-    alerts.push(
-      Alert.create({
-        status: AlertStatus.DECLINED,
-        user: users[Math.floor(Math.random() * users.length) + 1],
-        comment: lorem.sentence(),
-        timestamp: date.recent(365),
-        hostname: internet.domainName(),
-        file: system.filePath(),
-        changeAgent: internet.userAgent(),
-        changeProcess: git.branch(),
-      })
-    );
-  }
+    for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
+      alerts.push(
+        Alert.create({
+          status: AlertStatus.DECLINED,
+          user: users[Math.floor(Math.random() * users.length) + 1],
+          comment: lorem.sentence(),
+          timestamp: date.recent(Math.floor(Math.random() * 365) + 1),
+          hostname: internet.domainName(),
+          file: system.filePath(),
+          changeAgent: internet.userAgent(),
+          changeProcess: git.branch(),
+        })
+      );
+    }
 
-  for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
-    alerts.push(
-      Alert.create({
-        status: AlertStatus.UNACKNOWLEDGED,
-        timestamp: date.recent(365),
-        hostname: internet.domainName(),
-        file: system.filePath(),
-        changeAgent: internet.userAgent(),
-        changeProcess: git.branch(),
-      })
-    );
-  }
+    for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
+      alerts.push(
+        Alert.create({
+          status: AlertStatus.UNACKNOWLEDGED,
+          timestamp: date.recent(Math.floor(Math.random() * 365) + 1),
+          hostname: internet.domainName(),
+          file: system.filePath(),
+          changeAgent: internet.userAgent(),
+          changeProcess: git.branch(),
+        })
+      );
+    }
 
-  await connection
-    .createQueryBuilder()
-    .insert()
-    .into(Alert)
-    .values(alerts)
-    .execute()
-    .catch(() => {});
+    await connection
+      .createQueryBuilder()
+      .insert()
+      .into(Alert)
+      .values(alerts)
+      .execute()
+      .catch(() => {});
+  } catch {}
 };
