@@ -1,19 +1,13 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { Redirect, Route, RouteProps } from "react-router-dom";
 import { AuthContext } from "./context";
 
-const PrivateRoute: React.FC<RouteProps> = ({ children, ...props }) => {
+const PrivateRoute: React.FC<RouteProps> = ({ component, ...routeProps }) => {
   const context = useContext(AuthContext);
+  if (context.auth) return <Route {...routeProps} component={component} />;
   return (
-    <Route
-      {...props}
-      render={({ location }) =>
-        context.auth ? (
-          children
-        ) : (
-          <Redirect to={{ pathname: "/login", state: { from: location } }} />
-        )
-      }
+    <Redirect
+      to={{ pathname: "/login", state: { from: window.location.pathname } }}
     />
   );
 };

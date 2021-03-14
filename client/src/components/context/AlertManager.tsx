@@ -15,14 +15,19 @@ interface Filter {
 interface Props {}
 export interface State {
   entries: IEntry[];
+  modalViewing: IEntry | undefined;
+  checking: boolean;
   rowCount: number;
   filter: Filter;
   updateFilter: (newFilter: Partial<Filter>) => void;
+  changeModalViewing: (newView: string | undefined) => void;
   fetchAlerts: () => void;
 }
 
 let initialState: State = {
   entries: [],
+  modalViewing: undefined,
+  checking: true,
   rowCount: 0,
   filter: {
     time: "DESC",
@@ -34,6 +39,7 @@ let initialState: State = {
     page: 1,
   },
   updateFilter: (newFilter: Partial<Filter>) => {},
+  changeModalViewing: (newView: string | undefined) => {},
   fetchAlerts: () => {},
 };
 
@@ -45,6 +51,7 @@ export class AlertManager extends Component<Props, State> {
     this.state = {
       ...initialState,
       updateFilter: this.updateFilter,
+      changeModalViewing: this.changeModalViewing,
       fetchAlerts: this.fetchAlerts,
     };
   }
@@ -52,6 +59,28 @@ export class AlertManager extends Component<Props, State> {
   componentDidMount() {
     this.fetchAlerts();
   }
+
+  changeModalViewing = async (newView: string | undefined) => {
+    if (newView === undefined)
+      return this.setState({ modalViewing: undefined });
+    fetch(`${API_DOMAIN}/alert/get`, {
+      credentials: "include",
+      method: "POST",
+      body: JSON.stringify({ alertId: newView }),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((result) => {
+        if (result.status === 200) return result.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          this.setState({ modalViewing: data.alert });
+        }
+      })
+      .catch(() => {
+        //  Uh ohh.
+      });
+  };
 
   updateFilter = (newFilter: Partial<Filter>) => {
     if (!newFilter.page) {
@@ -85,6 +114,9 @@ export class AlertManager extends Component<Props, State> {
       })
       .catch(() => {
         console.log("error");
+      })
+      .finally(() => {
+        this.setState({ checking: false });
       });
   };
 

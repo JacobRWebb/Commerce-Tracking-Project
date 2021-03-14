@@ -6,7 +6,6 @@ import {
   Stack,
   Text,
   theme,
-  Tooltip,
 } from "@chakra-ui/react";
 import moment from "moment";
 import React, { Component } from "react";
@@ -19,7 +18,7 @@ export enum AlertStatus {
 }
 
 export interface IEntry {
-  id: number;
+  id: string;
   status: AlertStatus;
   timestamp: string;
   user?: { id: string; username: string; role: string };
@@ -35,6 +34,7 @@ export interface IEntry {
 interface Props {
   index: number;
   entry: IEntry;
+  changeModal: (newView: string | undefined) => void;
 }
 interface State {}
 
@@ -99,11 +99,13 @@ export default class Entry extends Component<Props, State> {
               <></>
             )}
           </Stack>
-          <Tooltip label="Not implemented yet">
-            <Button border="2px" borderColor="green.500">
-              Edit
-            </Button>
-          </Tooltip>
+          <Button
+            border="2px"
+            borderColor="green.500"
+            onClick={() => this.props.changeModal(entry.id)}
+          >
+            Edit
+          </Button>
         </Stack>
       </Box>
     );
@@ -115,7 +117,7 @@ interface IStatusTheme {
   type: "info" | "warning" | "success" | "error";
 }
 
-const statusTheme = (status: AlertStatus): IStatusTheme => {
+export const statusTheme = (status: AlertStatus): IStatusTheme => {
   switch (status) {
     case AlertStatus.ACKNOWLEDGED:
       return { borderColor: theme.colors.green[200], type: "success" };

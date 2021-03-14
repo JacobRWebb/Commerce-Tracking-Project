@@ -43,11 +43,11 @@ const loopCreate = async () => {
     let users = await User.find({});
     let alerts: Alert[] = [];
 
-    for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
+    for (let i = 0; i < Math.floor(Math.random() * 500); i++) {
       alerts.push(
         Alert.create({
           status: AlertStatus.ACKNOWLEDGED,
-          user: users[Math.floor(Math.random() * users.length) + 1],
+          user: users[Math.floor(Math.random() * users.length)],
           comment: lorem.sentence(),
           timestamp: date.recent(Math.floor(Math.random() * 365) + 1),
           hostname: internet.domainName(),
@@ -58,11 +58,11 @@ const loopCreate = async () => {
       );
     }
 
-    for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
+    for (let i = 0; i < Math.floor(Math.random() * 500); i++) {
       alerts.push(
         Alert.create({
           status: AlertStatus.DECLINED,
-          user: users[Math.floor(Math.random() * users.length) + 1],
+          user: users[Math.floor(Math.random() * users.length)],
           comment: lorem.sentence(),
           timestamp: date.recent(Math.floor(Math.random() * 365) + 1),
           hostname: internet.domainName(),
@@ -73,7 +73,7 @@ const loopCreate = async () => {
       );
     }
 
-    for (let i = 0; i < Math.floor(Math.random() * 101); i++) {
+    for (let i = 0; i < Math.floor(Math.random() * 500); i++) {
       alerts.push(
         Alert.create({
           status: AlertStatus.UNACKNOWLEDGED,

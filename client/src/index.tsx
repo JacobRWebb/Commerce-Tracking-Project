@@ -7,11 +7,11 @@ import "./index.css";
 
 ReactDOM.render(
   <React.StrictMode>
-    <ChakraProvider>
-      <Auth>
+    <Auth>
+      <ChakraProvider>
         <App />
-      </Auth>
-    </ChakraProvider>
+      </ChakraProvider>
+    </Auth>
   </React.StrictMode>,
   document.getElementById("root")
 );

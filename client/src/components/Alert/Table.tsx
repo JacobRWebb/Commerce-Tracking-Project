@@ -1,6 +1,7 @@
 import { Stack } from "@chakra-ui/layout";
 import React, { Component } from "react";
 import { AlertManager } from "../context";
+import EntryModal from "./EntryModal";
 import TableHeader from "./TableHeader";
 import TableList from "./TableList";
 import TableOptions from "./TableOptions";
@@ -16,6 +17,7 @@ export default class Table extends Component<Props, State> {
           <TableHeader />
           <TableOptions />
           <TableList />
+          <EntryModal />
         </Stack>
       </AlertManager>
     );

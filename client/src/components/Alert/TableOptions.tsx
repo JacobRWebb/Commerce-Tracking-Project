@@ -176,38 +176,7 @@ export default class TableOptions extends Component<Props, State> {
                   placeholder="Hostname"
                 />
               </Box>
-              <Box
-                backgroundColor="white"
-                padding={1}
-                borderRadius={5}
-                borderColor={theme.colors.gray[500]}
-                borderWidth={1}
-              >
-                <Text fontSize="xl" textAlign="center" marginBottom={4}>
-                  Temporary Admin View
-                </Text>
-                <Button
-                  backgroundColor={
-                    context.filter.extended === true
-                      ? theme.colors.red[100]
-                      : "unset"
-                  }
-                  onClick={() =>
-                    context.updateFilter({ extended: !context.filter.extended })
-                  }
-                >
-                  Toggle Admin
-                </Button>
-              </Box>
             </Stack>
-            {/* <Button
-              marginTop={2}
-              onClick={() => context.fetchAlerts()}
-              variant="solid"
-              colorScheme="facebook"
-            >
-              Update Filter Search
-            </Button> */}
           </Box>
         </Stack>
         {context.entries.length > 1 ? (
@@ -224,6 +193,7 @@ export default class TableOptions extends Component<Props, State> {
               Last Page
             </Button>
             <NumberInput
+              width={100}
               defaultValue={context.filter.page}
               value={context.filter.page === 0 ? 1 : context.filter.page}
               min={1}
