@@ -8,6 +8,7 @@ import {
   Timestamp,
   UpdateDateColumn,
 } from "typeorm";
+import { Application } from "./Application";
 import { User } from "./User";
 
 export enum AlertStatus {
@@ -32,11 +33,10 @@ export class Alert extends BaseEntity {
   @Column("timestamp", { default: new Date().toISOString() })
   timestamp: Timestamp;
 
-  @ManyToOne(() => User, (user) => user.manageAlerts, {
-    eager: true,
-    onDelete: "SET NULL",
-    nullable: true,
-  })
+  @ManyToOne(() => Application, { eager: true, cascade: true })
+  application: Application;
+
+  @ManyToOne(() => User, { eager: true, onDelete: "SET NULL" })
   user: User;
 
   @Column({ nullable: true })

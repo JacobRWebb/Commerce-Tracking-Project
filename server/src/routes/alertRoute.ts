@@ -16,12 +16,15 @@ router.post("/get", Auth.IsAuth, async (req, res) => {
   });
 });
 
+router.post("/update", Auth.IsAuth, async (req, res) => {
+  if (!res._User) return res.json({ success: false });
+  const result = await AlertController.update(req.body, res._User);
+  return res.json({ success: result });
+});
+
 router.post("/", Auth.IsAuth, async (req, res) => {
-  if (!res._User?.role) return res.json({ success: false });
-  const alertResponse = await AlertController.fetchAll(
-    req.body,
-    res._User.role
-  );
+  if (!res._User) return res.json({ success: false });
+  const alertResponse = await AlertController.fetchAll(req.body, res._User);
   if (!alertResponse) return res.json({ success: false });
   return res.json({
     success: true,

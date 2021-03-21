@@ -4,10 +4,10 @@ import { Stack, Text } from "@chakra-ui/layout";
 import theme from "@chakra-ui/theme";
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext, UserRole } from "../context";
+import { Role, _MasterContext } from "../context/MasterContext";
 
 const Navbar: React.FC = () => {
-  const context = useContext(AuthContext);
+  const context = useContext(_MasterContext);
   const [navOpen, setNavOpen] = useState(false);
 
   return (
@@ -28,9 +28,17 @@ const Navbar: React.FC = () => {
       borderTopWidth={2}
     >
       <Stack justify="space-between" direction="row" width="100%">
-        <Text color={theme.colors.green[600]} fontWeight="bold" fontSize="3xl">
-          ATAS
-        </Text>
+        <Stack align="center" direction="row">
+          <img width="25" height="25" src="globe.svg" alt="LOGO" />
+          <Text
+            color={theme.colors.green[600]}
+            fontWeight="bold"
+            fontSize="3xl"
+          >
+            ATAS
+          </Text>
+        </Stack>
+
         <Button display={["flex", "none"]} onClick={() => setNavOpen(!navOpen)}>
           {navOpen ? <MinusIcon /> : <HamburgerIcon />}
         </Button>
@@ -42,9 +50,9 @@ const Navbar: React.FC = () => {
         align="center"
       >
         <NavLink to="/" title="Home" />
-        {context.auth ? (
+        {context.AuthState.auth ? (
           <>
-            {context.role === UserRole.ADMIN ? (
+            {context.AuthState.role === Role.ADMIN ? (
               <NavLink to="/admin" title="Admin Page" />
             ) : (
               <></>

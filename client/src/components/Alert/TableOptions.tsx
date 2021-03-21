@@ -1,7 +1,13 @@
-import { Box, Stack, Text } from "@chakra-ui/layout";
+import { Divider, Stack, Text } from "@chakra-ui/layout";
 import {
   Button,
   ButtonGroup,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
   Input,
   NumberDecrementStepper,
   NumberIncrementStepper,
@@ -11,8 +17,19 @@ import {
   theme,
 } from "@chakra-ui/react";
 import React, { Component } from "react";
-import { AlertContext, AlertState } from "../context";
+import { MasterState, _MasterContext } from "../context/MasterContext";
 import { AlertStatus } from "./Entry";
+
+export interface Filter {
+  time: "ASC" | "DESC";
+  status: AlertStatus;
+  extended: boolean;
+  offset: number;
+  take: number;
+  hostname: string;
+  applicationID: string;
+  page: number;
+}
 
 interface Props {}
 interface State {
@@ -20,7 +37,8 @@ interface State {
 }
 
 export default class TableOptions extends Component<Props, State> {
-  static contextType = AlertContext;
+  static contextType = _MasterContext;
+
   constructor(props: any) {
     super(props);
     this.state = {
@@ -29,164 +47,220 @@ export default class TableOptions extends Component<Props, State> {
   }
 
   render() {
-    const context: AlertState = this.context;
+    const context: MasterState = this.context;
+    const maxPage = Math.ceil(
+      context.AlertState.rows / context.AlertState.filter.take
+    );
 
     return (
       <>
-        <Stack
-          direction="column"
-          padding={2}
-          borderRadius={3}
-          backgroundColor={theme.colors.gray[200]}
-        >
-          <Stack direction="row" justify="space-between">
+        <Stack direction="column" display="inline-flex">
+          <Stack
+            borderRadius={3}
+            padding={2}
+            backgroundColor={theme.colors.gray[200]}
+            direction="row"
+            justify="space-between"
+          >
             <Button
               colorScheme="blue"
               onClick={() => this.setState({ open: !this.state.open })}
             >
               Filter
             </Button>
-            <Button onClick={() => context.fetchAlerts()} colorScheme="green">
+            <Button
+              colorScheme="green"
+              onClick={() => context.AlertState.fetchEntries()}
+            >
               Refresh
             </Button>
           </Stack>
-          <Box display={this.state.open ? "block" : "none"}>
-            <Stack direction={["column", "row"]}>
-              <Box
-                backgroundColor="white"
-                padding={1}
-                borderRadius={5}
-                borderColor={theme.colors.gray[500]}
-                borderWidth={1}
-              >
-                <Text fontSize="xl" textAlign="center" marginBottom={4}>
-                  Sort By Time:
-                </Text>
-                <ButtonGroup variant="outline" spacing="6">
-                  <Button
-                    backgroundColor={
-                      context.filter.time === "ASC"
-                        ? theme.colors.blue[100]
-                        : "unset"
-                    }
-                    colorScheme="blue"
-                    onClick={() => context.updateFilter({ time: "ASC" })}
-                  >
-                    ASC
-                  </Button>
-                  <Button
-                    backgroundColor={
-                      context.filter.time === "DESC"
-                        ? theme.colors.blue[100]
-                        : "unset"
-                    }
-                    colorScheme="blue"
-                    onClick={() => context.updateFilter({ time: "DESC" })}
-                  >
-                    DESC
-                  </Button>
-                </ButtonGroup>
-              </Box>
-              <Box
-                backgroundColor="white"
-                padding={1}
-                borderRadius={5}
-                borderColor={theme.colors.gray[500]}
-                borderWidth={1}
-              >
-                <Text fontSize="xl" textAlign="center" marginBottom={4}>
-                  Sort By Status:
-                </Text>
-                <Stack direction={["column", "column", "column", "row"]}>
-                  <Button
-                    variant="outline"
-                    backgroundColor={
-                      context.filter.status === AlertStatus.ALL
-                        ? theme.colors.blackAlpha[100]
-                        : "unset"
-                    }
-                    colorScheme="black"
-                    onClick={() =>
-                      context.updateFilter({ status: AlertStatus.ALL })
-                    }
-                  >
-                    Show All
-                  </Button>
-                  <Button
-                    variant="outline"
-                    backgroundColor={
-                      context.filter.status === AlertStatus.ACKNOWLEDGED
-                        ? theme.colors.green[100]
-                        : "unset"
-                    }
-                    colorScheme="green"
-                    onClick={() =>
-                      context.updateFilter({ status: AlertStatus.ACKNOWLEDGED })
-                    }
-                  >
-                    Acknowledged
-                  </Button>
-                  <Button
-                    variant="outline"
-                    backgroundColor={
-                      context.filter.status === AlertStatus.UNACKNOWLEDGED
-                        ? theme.colors.blue[100]
-                        : "unset"
-                    }
-                    colorScheme="blue"
-                    onClick={() =>
-                      context.updateFilter({
-                        status: AlertStatus.UNACKNOWLEDGED,
+          <Drawer
+            isOpen={this.state.open}
+            placement="left"
+            onClose={() => this.setState({ open: false })}
+          >
+            <DrawerOverlay>
+              <DrawerContent>
+                <DrawerCloseButton />
+                <DrawerHeader
+                  fontWeight="bold"
+                  borderBottomWidth="1px"
+                  textAlign="center"
+                >
+                  Filter Settings
+                </DrawerHeader>
+                <DrawerBody>
+                  <Stack direction="column">
+                    <Text fontSize="xl" textAlign="center" marginBottom={4}>
+                      Sort By Time:
+                    </Text>
+                    <ButtonGroup
+                      justifyContent="center"
+                      variant="outline"
+                      spacing="6"
+                    >
+                      <Button
+                        backgroundColor={
+                          context.AlertState.filter.time === "ASC"
+                            ? theme.colors.blue[100]
+                            : "unset"
+                        }
+                        colorScheme="blue"
+                        onClick={() =>
+                          context.AlertState.updateFilter({ time: "ASC" })
+                        }
+                      >
+                        ASC
+                      </Button>
+                      <Button
+                        backgroundColor={
+                          context.AlertState.filter.time === "DESC"
+                            ? theme.colors.blue[100]
+                            : "unset"
+                        }
+                        colorScheme="blue"
+                        onClick={() =>
+                          context.AlertState.updateFilter({ time: "DESC" })
+                        }
+                      >
+                        DESC
+                      </Button>
+                    </ButtonGroup>
+                  </Stack>
+                  <Divider marginTop={2} />
+                  <Text fontSize="xl" textAlign="center" marginBottom={4}>
+                    Sort By Status:
+                  </Text>
+                  <Stack direction="column">
+                    <Stack
+                      direction="row"
+                      align="center"
+                      justify="space-around"
+                    >
+                      <Button
+                        variant="outline"
+                        backgroundColor={
+                          context.AlertState.filter.status === AlertStatus.ALL
+                            ? theme.colors.blackAlpha[100]
+                            : "unset"
+                        }
+                        colorScheme="black"
+                        onClick={() =>
+                          context.AlertState.updateFilter({
+                            status: AlertStatus.ALL,
+                          })
+                        }
+                      >
+                        Show All
+                      </Button>
+                      <Button
+                        variant="outline"
+                        backgroundColor={
+                          context.AlertState.filter.status ===
+                          AlertStatus.ACKNOWLEDGED
+                            ? theme.colors.green[100]
+                            : "unset"
+                        }
+                        colorScheme="green"
+                        onClick={() =>
+                          context.AlertState.updateFilter({
+                            status: AlertStatus.ACKNOWLEDGED,
+                          })
+                        }
+                      >
+                        Acknowledged
+                      </Button>
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      align="center"
+                      justify="space-around"
+                    >
+                      <Button
+                        variant="outline"
+                        backgroundColor={
+                          context.AlertState.filter.status ===
+                          AlertStatus.UNACKNOWLEDGED
+                            ? theme.colors.blue[100]
+                            : "unset"
+                        }
+                        colorScheme="blue"
+                        onClick={() =>
+                          context.AlertState.updateFilter({
+                            status: AlertStatus.UNACKNOWLEDGED,
+                          })
+                        }
+                      >
+                        Un-Acknowledged
+                      </Button>
+                      <Button
+                        variant="outline"
+                        backgroundColor={
+                          context.AlertState.filter.status ===
+                          AlertStatus.DECLINED
+                            ? theme.colors.red[100]
+                            : "unset"
+                        }
+                        colorScheme="red"
+                        onClick={() =>
+                          context.AlertState.updateFilter({
+                            status: AlertStatus.DECLINED,
+                          })
+                        }
+                      >
+                        Declined
+                      </Button>
+                    </Stack>
+                  </Stack>
+                  <Divider marginTop={2} />
+                  <Text fontSize="xl" textAlign="center" marginBottom={4}>
+                    Search By Hostname:
+                  </Text>
+                  <Input
+                    textAlign="center"
+                    value={context.AlertState.filter.hostname}
+                    onChange={(event) =>
+                      context.AlertState.updateFilter({
+                        hostname: event.target.value,
                       })
                     }
-                  >
-                    Un-Acknowledged
-                  </Button>
-                  <Button
-                    variant="outline"
-                    backgroundColor={
-                      context.filter.status === AlertStatus.DECLINED
-                        ? theme.colors.red[100]
-                        : "unset"
+                    placeholder="Hostname"
+                  />
+                  <Divider marginTop={2} />
+                  <Text fontSize="xl" textAlign="center" marginBottom={4}>
+                    Search By Application ID:
+                  </Text>
+                  <Input
+                    textAlign="center"
+                    maxLength={3}
+                    value={context.AlertState.filter.applicationID}
+                    onChange={(event) =>
+                      context.AlertState.updateFilter({
+                        applicationID: event.target.value,
+                      })
                     }
-                    colorScheme="red"
-                    onClick={() =>
-                      context.updateFilter({ status: AlertStatus.DECLINED })
-                    }
-                  >
-                    Declined
-                  </Button>
-                </Stack>
-              </Box>
-              <Box
-                backgroundColor="white"
-                padding={1}
-                borderRadius={5}
-                borderColor={theme.colors.gray[500]}
-                borderWidth={1}
-              >
-                <Text fontSize="xl" textAlign="center" marginBottom={4}>
-                  Search By Hostname:
-                </Text>
-                <Input
-                  value={context.filter.hostname}
-                  onChange={(event) =>
-                    context.updateFilter({ hostname: event.target.value })
-                  }
-                  placeholder="Hostname"
-                />
-              </Box>
-            </Stack>
-          </Box>
-        </Stack>
-        {context.entries.length > 1 ? (
-          <Stack direction="row" justify="flex-end" align="center">
+                    placeholder="ABC"
+                  />
+                </DrawerBody>
+              </DrawerContent>
+            </DrawerOverlay>
+          </Drawer>
+          <Stack
+            display={context.AlertState.entries.length >= 1 ? "flex" : "none"}
+            direction="row"
+            justify="flex-end"
+            align="center"
+          >
             <Button
-              disabled={context.filter.page <= 1}
+              disabled={context.AlertState.filter.page <= 1}
               onClick={() => {
-                context.updateFilter({
-                  page: context.filter.page - 1,
-                  offset: Math.floor(25 * (context.filter.page - 2)),
+                context.AlertState.updateFilter({
+                  page: context.AlertState.filter.page - 1,
+                  offset: Math.floor(
+                    context.AlertState.filter.take *
+                      (context.AlertState.filter.page - 2)
+                  ),
                 });
               }}
             >
@@ -194,34 +268,37 @@ export default class TableOptions extends Component<Props, State> {
             </Button>
             <NumberInput
               width={100}
-              defaultValue={context.filter.page}
-              value={context.filter.page === 0 ? 1 : context.filter.page}
+              defaultValue={context.AlertState.filter.page}
+              value={
+                context.AlertState.filter.page === 0
+                  ? 1
+                  : context.AlertState.filter.page
+              }
               min={1}
-              max={Math.ceil(context.rowCount / context.filter.take)}
+              max={maxPage}
               keepWithinRange={true}
               onChange={(v, n) => {
-                if (n > Math.ceil(context.rowCount / context.filter.take)) {
-                  if (
-                    context.filter.page ===
-                    Math.ceil(context.rowCount / context.filter.take)
-                  )
-                    return;
-                  context.updateFilter({
-                    page: Math.ceil(context.rowCount / context.filter.take),
+                if (n > maxPage) {
+                  if (context.AlertState.filter.page === maxPage) return;
+                  context.AlertState.updateFilter({
+                    page: Math.ceil(maxPage),
                     offset: Math.floor(
-                      context.filter.take *
-                        (Math.ceil(context.rowCount / context.filter.take) - 1)
+                      context.AlertState.filter.take * (maxPage - 1)
                     ),
                   });
                 } else if (n < 1) {
-                  context.updateFilter({
+                  context.AlertState.updateFilter({
                     page: 1,
-                    offset: Math.floor(context.filter.take * (1 - 1)),
+                    offset: Math.floor(
+                      context.AlertState.filter.take * (1 - 1)
+                    ),
                   });
                 } else {
-                  context.updateFilter({
+                  context.AlertState.updateFilter({
                     page: n,
-                    offset: Math.floor(context.filter.take * (n - 1)),
+                    offset: Math.floor(
+                      context.AlertState.filter.take * (n - 1)
+                    ),
                   });
                 }
               }}
@@ -232,25 +309,20 @@ export default class TableOptions extends Component<Props, State> {
                 <NumberDecrementStepper />
               </NumberInputStepper>
             </NumberInput>
-            <Text>/ {Math.ceil(context.rowCount / context.filter.take)}</Text>
+            <Text>{`/ ${maxPage}`}</Text>
             <Button
-              disabled={
-                context.filter.page >=
-                Math.ceil(context.rowCount / context.filter.take)
-              }
+              disabled={context.AlertState.filter.page >= maxPage}
               onClick={() => {
-                context.updateFilter({
-                  page: context.filter.page + 1,
-                  offset: Math.floor(25 * context.filter.page),
+                context.AlertState.updateFilter({
+                  page: context.AlertState.filter.page + 1,
+                  offset: Math.floor(25 * context.AlertState.filter.page),
                 });
               }}
             >
               Next Page
             </Button>
           </Stack>
-        ) : (
-          <></>
-        )}
+        </Stack>
       </>
     );
   }

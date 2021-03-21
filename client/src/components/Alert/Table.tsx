@@ -1,6 +1,5 @@
 import { Stack } from "@chakra-ui/layout";
 import React, { Component } from "react";
-import { AlertManager } from "../context";
 import EntryModal from "./EntryModal";
 import TableHeader from "./TableHeader";
 import TableList from "./TableList";
@@ -12,14 +11,12 @@ interface State {}
 export default class Table extends Component<Props, State> {
   render() {
     return (
-      <AlertManager>
-        <Stack direction="column" marginTop={5}>
-          <TableHeader />
-          <TableOptions />
-          <TableList />
-          <EntryModal />
-        </Stack>
-      </AlertManager>
+      <Stack direction="column" marginTop={5}>
+        <TableHeader />
+        <TableOptions />
+        <TableList />
+        <EntryModal />
+      </Stack>
     );
   }
 }

@@ -20,6 +20,10 @@ export enum AlertStatus {
 export interface IEntry {
   id: string;
   status: AlertStatus;
+  application: {
+    id: string;
+    name: string;
+  };
   timestamp: string;
   user?: { id: string; username: string; role: string };
   comment?: string;
@@ -62,7 +66,7 @@ export default class Entry extends Component<Props, State> {
           <Stack direction="column" width={[200, 200, 300]} overflow="hidden">
             <Alert padding="unset" backgroundColor="unset" status={sTheme.type}>
               <AlertIcon />
-              {entry.status}
+              <Text>{entry.status}</Text>
             </Alert>
             <Text isTruncated={true} noOfLines={5}>
               File Path: {entry.file}
@@ -74,13 +78,10 @@ export default class Entry extends Component<Props, State> {
             width={[200, 200, 300]}
             overflow="hidden"
           >
-            <Text isTruncated={true}>Hostname: {entry.hostname}</Text>
-            <Text isTruncated={true} noOfLines={2}>
-              Change Agent: {entry.changeAgent}
-            </Text>
             <Text isTruncated={true}>
-              Change Process: {entry.changeProcess}
+              Application ID: {entry.application.id}
             </Text>
+            <Text isTruncated={true}>Hostname: {entry.hostname}</Text>
           </Stack>
           <Stack
             display={["none", "unset"]}
@@ -117,7 +118,9 @@ interface IStatusTheme {
   type: "info" | "warning" | "success" | "error";
 }
 
-export const statusTheme = (status: AlertStatus): IStatusTheme => {
+export const statusTheme = (status: AlertStatus | undefined): IStatusTheme => {
+  if (status === undefined)
+    return { type: "info", borderColor: theme.colors.red[100] };
   switch (status) {
     case AlertStatus.ACKNOWLEDGED:
       return { borderColor: theme.colors.green[200], type: "success" };

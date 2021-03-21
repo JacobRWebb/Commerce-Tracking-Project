@@ -2,16 +2,16 @@ import { ChakraProvider } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
-import { Auth } from "./components/context";
+import MasterContext from "./components/context/MasterContext";
 import "./index.css";
 
 ReactDOM.render(
   <React.StrictMode>
-    <Auth>
+    <MasterContext>
       <ChakraProvider>
         <App />
       </ChakraProvider>
-    </Auth>
+    </MasterContext>
   </React.StrictMode>,
   document.getElementById("root")
 );

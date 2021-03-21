@@ -3,12 +3,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
+  ManyToMany,
   PrimaryGeneratedColumn,
   Timestamp,
   UpdateDateColumn,
 } from "typeorm";
-import { Alert } from "./Alert";
+import { Application } from "./Application";
 
 export enum UserRole {
   ADMIN = "admin",
@@ -29,10 +29,8 @@ export class User extends BaseEntity {
   @Column({ type: "enum", enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @OneToMany(() => Alert, (alert) => alert.user, {
-    onDelete: "DEFAULT",
-  })
-  manageAlerts: Alert[];
+  @ManyToMany(() => Application, (application) => application.users)
+  applications: Application[];
 
   @Column({ type: "timestamp", default: new Date().toISOString() })
   lastLogout: string;

@@ -2,7 +2,7 @@ import { Box, Stack, Text } from "@chakra-ui/layout";
 import { SkeletonText } from "@chakra-ui/skeleton";
 import theme from "@chakra-ui/theme";
 import React, { Component } from "react";
-import { AlertContext, AlertState } from "../context";
+import { MasterState, _MasterContext } from "../context/MasterContext";
 import Entry, { IEntry } from "./Entry";
 
 interface Props {}
@@ -11,45 +11,42 @@ interface State {
 }
 
 export default class TableList extends Component<Props, State> {
-  static contextType = AlertContext;
-  constructor(props: any, context: AlertState) {
+  static contextType = _MasterContext;
+
+  constructor(props: any, context: MasterState) {
     super(props);
+    context.AlertState.fetchEntries();
     this.state = {
-      entries: context.entries,
+      entries: [],
     };
   }
 
-  componentDidUpdate() {
-    const context: AlertState = this.context;
-    if (this.state.entries !== context.entries)
-      this.setState({ entries: context.entries });
-  }
-
-  shouldComponentUpdate(prevProps: Props, prevState: State) {
-    const context: AlertState = this.context;
+  shouldComponentUpdate() {
+    const context: MasterState = this.context;
     if (
-      context.filter.extended !==
-      (window.location.pathname === "/admin" ? true : false)
-    ) {
-      context.updateFilter({
-        extended: window.location.pathname === "/admin" ? true : false,
-      });
-    }
-    if (prevState.entries !== context.entries) return true;
-    return false;
+      !context.AlertState.filter.extended &&
+      window.location.pathname === "/admin"
+    )
+      context.AlertState.updateFilter({ extended: true });
+    else if (
+      context.AlertState.filter.extended &&
+      window.location.pathname !== "/admin"
+    )
+      context.AlertState.updateFilter({ extended: false });
+    return true;
   }
 
   render() {
-    const context: AlertState = this.context;
-    if (context.checking) {
+    const context: MasterState = this.context;
+    if (context.AlertState.isFetching) {
       return (
         <SkeletonText spacing={6} noOfLines={10}>
-          reee
+          placeholder
         </SkeletonText>
       );
     }
 
-    if (!context.checking && context.entries.length < 1) {
+    if (context.AlertState.entries.length < 1) {
       return (
         <Box
           backgroundColor={theme.colors.gray[200]}
@@ -66,13 +63,13 @@ export default class TableList extends Component<Props, State> {
     return (
       <Box paddingBottom={10}>
         <Stack direction="column" spacing={3}>
-          {context.entries.map((entry, index) => {
+          {context.AlertState.entries.map((entry, index) => {
             return (
               <Entry
                 key={entry.id}
                 index={index}
                 entry={entry}
-                changeModal={context.changeModalViewing}
+                changeModal={context.AlertState.changeEntry}
               />
             );
           })}

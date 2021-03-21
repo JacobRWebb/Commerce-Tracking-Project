@@ -1,118 +1,107 @@
 import { Alert, AlertIcon } from "@chakra-ui/alert";
+import { Divider, Stack, Text } from "@chakra-ui/layout";
 import {
-  Button,
-  Divider,
-  Editable,
-  EditableInput,
-  EditablePreview,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Select,
-  Stack,
-  Text,
+} from "@chakra-ui/modal";
+import {
+  Button,
+  Editable,
+  EditableInput,
+  EditablePreview,
   Textarea,
   Tooltip,
 } from "@chakra-ui/react";
 import moment from "moment";
 import React, { Component } from "react";
-import { AlertContext, AlertState } from "../context";
+import { MasterState, _MasterContext } from "../context/MasterContext";
 import { AlertStatus, IEntry, statusTheme } from "./Entry";
 
 interface Props {}
-interface State {
-  newComment: string;
-  newState: AlertStatus;
-}
+interface State {}
 
 export default class EntryModal extends Component<Props, State> {
-  static contextType = AlertContext;
+  static contextType = _MasterContext;
 
-  constructor(props: any) {
-    super(props);
-    this.state = {
-      newComment: "",
-      newState: AlertStatus.UNACKNOWLEDGED,
-    };
-  }
-
-  submit = () => {
-    const context: AlertState = this.context;
-    const { newComment, newState } = this.state;
+  close = () => {
+    const context: MasterState = this.context;
+    context.AlertState.changeEntry(undefined);
+    context.updateAlertState({ tempComment: "", tempState: undefined });
   };
 
   render() {
-    const context: AlertState = this.context;
-    const entry: IEntry | undefined = context.modalViewing;
-    if (entry === undefined) return <></>;
-    if (this.state.newState !== entry.status)
-      this.setState({ newState: entry.status });
-    const sTheme = statusTheme(entry.status);
+    const context: MasterState = this.context;
+    if (context.AlertState.currentEntry === undefined) return <></>;
+    const Entry: IEntry = context.AlertState.currentEntry;
+    const sTheme = statusTheme(Entry.status);
     return (
-      <>
-        <Modal
-          isOpen={context.modalViewing === undefined ? false : true}
-          onClose={() => context.changeModalViewing(undefined)}
-        >
-          <ModalOverlay />
+      <Modal
+        isOpen={context.AlertState.currentEntry === undefined ? false : true}
+        onClose={() => this.close()}
+      >
+        <ModalOverlay>
           <ModalContent>
             <ModalHeader>
               <Alert
                 padding="unset"
                 backgroundColor="unset"
                 status={sTheme.type}
-                justifyContent="center"
                 fontSize="2xl"
+                justifyContent="center"
               >
                 <AlertIcon />
-                <Text>Alert {entry.status}</Text>
+                <Text>Alert {Entry.status}</Text>
               </Alert>
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Stack direction="column" spacing={2}>
                 <Divider />
-                {entry.user === null || entry.user === undefined ? (
+                <Text fontWeight="bold">Application ID:</Text>
+                <Text>{Entry.application.id}</Text>
+                <Divider />
+                {Entry.user === undefined || Entry.user === null ? (
                   <></>
                 ) : (
                   <>
                     <Text fontWeight="bold">
-                      Last Changed {moment(entry.updatedAt).fromNow()} By:
+                      Last Changed {moment(Entry.updatedAt).fromNow()} By:
                     </Text>
-                    <Text>{entry.user.username}</Text>
+                    <Text>{Entry.user.username}</Text>
                     <Divider />
                   </>
                 )}
                 <Text fontWeight="bold">File Path:</Text>
                 <Text noOfLines={2} isTruncated={true}>
-                  {entry.file}
+                  {Entry.file}
                 </Text>
                 <Divider />
                 <Text fontWeight="bold">Change Agent:</Text>
                 <Text noOfLines={2} isTruncated={true}>
-                  {entry.changeAgent}
+                  {Entry.changeAgent}
                 </Text>
                 <Divider />
                 <Text fontWeight="bold">Change Process:</Text>
                 <Text noOfLines={2} isTruncated={true}>
-                  {entry.changeProcess}
+                  {Entry.changeProcess}
                 </Text>
                 <Divider />
                 <Text fontWeight="bold">Comment:</Text>
-                <Tooltip label="Double Click To Edit">
+                <Tooltip label="Click To Edit">
                   <Editable
                     defaultValue={
-                      entry.comment === undefined || entry.comment === null
+                      Entry.comment === undefined ||
+                      Entry.comment === null ||
+                      Entry.comment.length < 1
                         ? "Leave a comment"
-                        : `${entry.comment}`
+                        : Entry.comment
                     }
                     width="100%"
-                    onSubmit={() => {
-                      console.log("Comment");
-                    }}
+                    onSubmit={(value) => this.setState({ comment: value })}
                   >
                     <EditablePreview
                       padding={1}
@@ -123,9 +112,11 @@ export default class EntryModal extends Component<Props, State> {
                       isTruncated={true}
                     />
                     <EditableInput
-                      value={this.state.newComment}
+                      value={Entry.comment}
                       onChange={(event) =>
-                        this.setState({ newComment: event.target.value })
+                        context.debounceAlertState({
+                          tempComment: event.target.value,
+                        })
                       }
                       as={Textarea}
                     />
@@ -133,28 +124,82 @@ export default class EntryModal extends Component<Props, State> {
                 </Tooltip>
                 <Divider />
                 <Text fontWeight="bold">Status</Text>
-                <Select onChange={(event) => {}}>
-                  <option value={AlertStatus.ACKNOWLEDGED}>
+                <Stack direction="row">
+                  <Button
+                    colorScheme="green"
+                    variant={
+                      context.AlertState.tempState === undefined
+                        ? Entry.status === AlertStatus.ACKNOWLEDGED
+                          ? "solid"
+                          : "outline"
+                        : context.AlertState.tempState ===
+                          AlertStatus.ACKNOWLEDGED
+                        ? "solid"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      context.debounceAlertState({
+                        tempState: AlertStatus.ACKNOWLEDGED,
+                      })
+                    }
+                  >
                     {AlertStatus.ACKNOWLEDGED}
-                  </option>
-                  <option value={AlertStatus.UNACKNOWLEDGED}>
-                    {AlertStatus.UNACKNOWLEDGED}
-                  </option>
-                  <option value={AlertStatus.DECLINED}>
+                  </Button>
+                  <Button
+                    colorScheme="red"
+                    variant={
+                      context.AlertState.tempState === undefined
+                        ? Entry.status === AlertStatus.DECLINED
+                          ? "solid"
+                          : "outline"
+                        : context.AlertState.tempState === AlertStatus.DECLINED
+                        ? "solid"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      context.debounceAlertState({
+                        tempState: AlertStatus.DECLINED,
+                      })
+                    }
+                  >
                     {AlertStatus.DECLINED}
-                  </option>
-                </Select>
+                  </Button>
+                  <Button
+                    colorScheme="blue"
+                    variant={
+                      context.AlertState.tempState === undefined
+                        ? Entry.status === AlertStatus.UNACKNOWLEDGED
+                          ? "solid"
+                          : "outline"
+                        : context.AlertState.tempState ===
+                          AlertStatus.UNACKNOWLEDGED
+                        ? "solid"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      context.debounceAlertState({
+                        tempState: AlertStatus.UNACKNOWLEDGED,
+                      })
+                    }
+                  >
+                    {AlertStatus.UNACKNOWLEDGED}
+                  </Button>
+                </Stack>
                 <Divider />
                 <Stack direction="row-reverse">
-                  <Tooltip label="Not implemented">
-                    <Button>Submit Change</Button>
-                  </Tooltip>
+                  <Button
+                    onClick={() => {
+                      context.AlertState.saveEntry();
+                    }}
+                  >
+                    Submit Edit
+                  </Button>
                 </Stack>
               </Stack>
             </ModalBody>
           </ModalContent>
-        </Modal>
-      </>
+        </ModalOverlay>
+      </Modal>
     );
   }
 }
