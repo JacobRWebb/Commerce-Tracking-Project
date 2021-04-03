@@ -1,4 +1,12 @@
-import { Brackets, getConnection } from "typeorm";
+import {
+  Brackets,
+  getConnection,
+  In,
+  IsNull,
+  Like,
+  MoreThanOrEqual,
+  Not,
+} from "typeorm";
 import { Alert, AlertStatus, User, UserRole } from "../entities";
 
 const USER_DAY_THRESHOLD = 2;
@@ -24,7 +32,57 @@ const defaultFilter: IFilter = {
 };
 
 const alertController = {
+  getAll: async (user: User, inboundFilter: Partial<IFilter>) => {
+    const start = Date.now();
+
+    const filter: IFilter = { ...defaultFilter, ...inboundFilter };
+    const timeConstraint = new Date();
+    timeConstraint.setDate(timeConstraint.getDate() - USER_DAY_THRESHOLD);
+
+    const query = await getConnection()
+      .getRepository(Alert)
+      .findAndCount({
+        take: filter.take,
+        skip: filter.offset,
+        relations: ["user", "application"],
+        where: {
+          application: {
+            id:
+              Like(`%${filter.applicationID}%`) &&
+              filter.extended &&
+              user.role === UserRole.ADMIN
+                ? Not(IsNull())
+                : In(
+                    user.applications.map((app) => {
+                      return app.id;
+                    })
+                  ),
+          },
+          status:
+            filter.status === AlertStatus.ALL ? Not(IsNull()) : filter.status,
+          timestamp:
+            filter.extended && user.role === UserRole.ADMIN
+              ? Not(IsNull())
+              : MoreThanOrEqual(timeConstraint),
+          hostname:
+            filter.hostname.length < 1
+              ? Not(IsNull())
+              : Like(`%${filter.hostname}%`),
+        },
+        order: { timestamp: filter.time },
+      });
+
+    console.log(`Queries: ${query[1]}`);
+    console.log(user);
+    console.log(`Time taken ${Date.now() - start}/ms`);
+    return query;
+  },
+};
+
+const xalertController = {
   fetchAll: async (body: Object, user: User) => {
+    const start = Date.now();
+
     let filter: IFilter = { ...defaultFilter, ...body };
     const timeConstraint = new Date();
     timeConstraint.setDate(timeConstraint.getDate() - USER_DAY_THRESHOLD);
@@ -93,6 +151,9 @@ const alertController = {
         console.log("Alert Controller error while fetching entries.");
       });
 
+    const end = Date.now();
+    console.log(`Took ${end - start}/ms`);
+
     return y;
   },
   update: async (
@@ -116,5 +177,6 @@ const alertController = {
     return true;
   },
 };
+xalertController;
 
 export default alertController;

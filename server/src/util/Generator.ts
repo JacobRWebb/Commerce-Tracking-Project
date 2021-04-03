@@ -1,4 +1,4 @@
-import { date, git, internet, name, system } from "faker";
+import { date, git, internet, lorem, name, system } from "faker";
 import { getConnection } from "typeorm";
 import { Alert, AlertStatus, Application, User, UserRole } from "../entities";
 
@@ -7,9 +7,9 @@ export default class Generator {
 
   base = async () => {
     if (!getConnection().isConnected) return;
-    await Alert.delete({});
-    await Application.delete({});
-    await User.delete({});
+    await Alert.delete({}).catch((error) => console.error(error));
+    await Application.delete({}).catch((error) => console.error(error));
+    await User.delete({}).catch((error) => console.error(error));
 
     await this.createApplications()
       .finally(() => {
@@ -68,7 +68,6 @@ export default class Generator {
   };
 
   private createUsers = async () => {
-    await User.delete({});
     const applications: Application[] = await Application.find({});
 
     let user: User = User.create({
@@ -88,7 +87,7 @@ export default class Generator {
     user.applications = this.randomApplications(applications);
     await user.save();
 
-    for (let i = 0; i < Math.floor(Math.random() * 20); i++) {
+    for (let i = 0; i < Math.floor(Math.random() * 20) + 10; i++) {
       user = User.create({
         username: name.firstName(),
         password: internet.password(),
@@ -104,6 +103,8 @@ export default class Generator {
 
   private alertBuilder = async () => {
     const applications = await Application.find({});
+    const users = await User.find({});
+
     let auxilaryAlerts: Alert[] = [];
 
     for (let i = 0; i < Math.floor(Math.random() * 500); i++) {
@@ -115,13 +116,21 @@ export default class Generator {
       auxilaryAlerts.push(
         Alert.create({
           status,
+          comment:
+            status === AlertStatus.UNACKNOWLEDGED
+              ? undefined
+              : lorem.sentence(),
+          user:
+            status === AlertStatus.UNACKNOWLEDGED
+              ? undefined
+              : users[Math.floor(Math.random() * users.length)],
           timestamp: date.recent(Math.floor(Math.random() * 100)),
           hostname: internet.domainName(),
           file: system.filePath(),
           changeAgent: internet.userAgent(),
           changeProcess: git.branch(),
           application:
-            applications[Math.floor(Math.random() * applications.length) + 1],
+            applications[Math.floor(Math.random() * applications.length)],
         })
       );
     }
