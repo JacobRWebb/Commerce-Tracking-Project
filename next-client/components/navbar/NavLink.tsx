@@ -9,7 +9,11 @@ const NavLink: FunctionComponent<{ to: string }> = ({ children, to }) => {
     router.push(to);
   };
 
-  return <Button onClick={() => redirect()}>{children}</Button>;
+  return (
+    <Button zIndex={2} onClick={() => redirect()}>
+      {children}
+    </Button>
+  );
 };
 
 export default NavLink;

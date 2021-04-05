@@ -17,6 +17,7 @@ const Navbar: FunctionComponent = () => {
 
   return (
     <Stack
+      backgroundColor="white"
       minHeight={["100%", "50px"]}
       maxHeight={[navOpen ? "unset" : "60px", "60px"]}
       direction={["column", "row"]}
@@ -27,6 +28,9 @@ const Navbar: FunctionComponent = () => {
       borderTopWidth="2px"
       boxShadow="lg"
       align="center"
+      position="sticky"
+      top="0"
+      zIndex={2}
     >
       <Stack
         direction="row"

@@ -10,29 +10,30 @@ import {
 import theme from "@chakra-ui/theme";
 import { useRouter } from "next/router";
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { mutate } from "swr";
 import { API_DOMAIN } from "../util/constants";
 import { useUser } from "../util/swrFunctions";
 
 const Login: FunctionComponent = () => {
-  const user = useUser();
+  const { data, loading } = useUser();
   const router = useRouter();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (user.data) {
+    if (data && !loading) {
       router.push("/");
     }
-  }, [user]);
+  }, [data, loading]);
 
   const submit = (event: React.FormEvent) => {
     //  @TODO // Client side validation.
 
     event.preventDefault();
-    setLoading(true);
+    setFetching(true);
 
     fetch(`${API_DOMAIN}/user/login`, {
       credentials: "include",
@@ -45,11 +46,11 @@ const Login: FunctionComponent = () => {
         throw new Error("Something went wrong.");
       })
       .then((data) => {
-        user.mutate();
-        setLoading(false);
+        mutate("/user");
+        setFetching(false);
       })
       .catch((error) => {
-        setLoading(false);
+        setFetching(false);
       });
   };
 
@@ -76,7 +77,7 @@ const Login: FunctionComponent = () => {
               />
               <Input
                 autoComplete="username"
-                disabled={loading}
+                disabled={fetching}
                 value={username}
                 type="username"
                 placeholder="Username"
@@ -90,7 +91,7 @@ const Login: FunctionComponent = () => {
               />
               <Input
                 autoComplete="password"
-                disabled={loading}
+                disabled={fetching}
                 value={password}
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
@@ -98,7 +99,7 @@ const Login: FunctionComponent = () => {
               />
               <InputRightElement width="4.5rem">
                 <Button
-                  disabled={loading}
+                  disabled={fetching}
                   h="1.75rem"
                   size="sm"
                   onClick={() => setShowPassword(!showPassword)}
@@ -112,7 +113,7 @@ const Login: FunctionComponent = () => {
                 <Tooltip label="Not implemented">Forgot Password?</Tooltip>
               </Button>
             </Stack>
-            <Button disabled={loading} colorScheme="blue" type="submit">
+            <Button disabled={fetching} colorScheme="blue" type="submit">
               Login
             </Button>
           </Stack>

@@ -2,6 +2,7 @@ import { Box, ChakraProvider, CSSReset } from "@chakra-ui/react";
 import { AppType } from "next/dist/next-server/lib/utils";
 import Head from "next/head";
 import Navbar from "../components/navbar/Navbar";
+import EntryContextProvider from "../context/EntryContext";
 
 const App: AppType = ({ Component, pageProps }) => {
   return (
@@ -14,7 +15,9 @@ const App: AppType = ({ Component, pageProps }) => {
         <CSSReset />
         <Navbar />
         <Box overflow="hidden">
-          <Component {...pageProps} />
+          <EntryContextProvider>
+            <Component {...pageProps} />
+          </EntryContextProvider>
         </Box>
       </ChakraProvider>
     </>
