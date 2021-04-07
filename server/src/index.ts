@@ -24,6 +24,7 @@ main()
     app.use(routes);
 
     const generator = new Generator();
+    generator;
     await generator.base();
 
     app.listen(PORT, () => {

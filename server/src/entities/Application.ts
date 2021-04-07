@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   PrimaryColumn,
@@ -12,6 +13,7 @@ import {
 import { User } from "./User";
 
 @Entity()
+@Index(["id", "name", "createdAt", "updatedAt"])
 export class Application extends BaseEntity {
   @PrimaryColumn("text")
   id: string;

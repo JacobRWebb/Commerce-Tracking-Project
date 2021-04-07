@@ -17,21 +17,18 @@ export enum UserRole {
 }
 
 @Entity()
+@Index(["id", "username", "password", "role", "createdAt", "updatedAt"])
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  @Index()
   id: string;
 
   @Column({ unique: true })
-  @Index()
   username: string;
 
   @Column({ select: false })
-  @Index()
   password: string;
 
   @Column({ type: "enum", enum: UserRole, default: UserRole.USER })
-  @Index()
   role: UserRole;
 
   @ManyToMany(() => Application, (application) => application.users)

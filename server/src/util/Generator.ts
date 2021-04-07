@@ -32,11 +32,11 @@ export default class Generator {
     }).catch((err) => console.error(err));
 
     if (!application) {
-      application = await Application.create({
+      application = Application.create({
         name: "DEFAULT",
         id: "ZZZ",
       });
-      application.save().catch((err) => console.error(err));
+      await application.save().catch((err) => console.error(err));
     }
 
     const userAccount = await User.findOne({
