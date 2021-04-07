@@ -3,7 +3,9 @@ import { Button } from "@chakra-ui/button";
 import { Stack, Text } from "@chakra-ui/layout";
 import theme from "@chakra-ui/theme";
 import moment from "moment";
-import { FunctionComponent } from "react";
+import { FunctionComponent, useContext } from "react";
+import { mutate } from "swr";
+import { EntryContext } from "../../context/EntryContext";
 import IEntry from "../../interface/IEntry";
 import { StatusTheme } from "../../util/statusTheme";
 
@@ -11,6 +13,7 @@ const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
   entry,
   index,
 }) => {
+  const context = useContext(EntryContext);
   const statusTheme = StatusTheme(entry.status);
 
   return (
@@ -65,7 +68,15 @@ const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
           <></>
         )}
       </Stack>
-      <Button colorScheme="blue">Edit</Button>
+      <Button
+        colorScheme="blue"
+        onClick={() => {
+          mutate("/user");
+          context.viewEntry(entry);
+        }}
+      >
+        Edit
+      </Button>
     </Stack>
   );
 };

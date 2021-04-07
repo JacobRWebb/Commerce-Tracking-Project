@@ -3,17 +3,14 @@ import { SkeletonText } from "@chakra-ui/skeleton";
 import theme from "@chakra-ui/theme";
 import { FunctionComponent, useContext } from "react";
 import { EntryContext } from "../../context/EntryContext";
-import { useEntries } from "../../util/swrFunctions";
 import Entry from "./Entry";
 
 const EntryTable: FunctionComponent = () => {
   const context = useContext(EntryContext);
-  const { data, loading } = useEntries();
 
   if (!context) return <></>;
-  if (loading) return <></>;
 
-  if (loading || !data) {
+  if (context.loading) {
     return (
       <SkeletonText spacing={6} noOfLines={10}>
         Placeholder
@@ -21,7 +18,7 @@ const EntryTable: FunctionComponent = () => {
     );
   }
 
-  if (data.alerts.length < 1) {
+  if (context.entries.length < 1) {
     return (
       <Box
         backgroundColor={theme.colors.gray[200]}
@@ -36,9 +33,9 @@ const EntryTable: FunctionComponent = () => {
   }
 
   return (
-    <Box paddingLeft="10%" paddingRight="10%">
+    <Box paddingTop="1%">
       <Stack direction="column" spacing={3}>
-        {data.alerts.map((entry, index) => (
+        {context.entries.map((entry, index) => (
           <Entry entry={entry} key={entry.id} index={index} />
         ))}
       </Stack>
