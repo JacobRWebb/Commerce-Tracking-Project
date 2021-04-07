@@ -22,46 +22,45 @@ export enum AlertStatus {
 @Entity()
 export class Alert extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
-
   @Index()
+  id: string;
+
   @Column({
     type: "enum",
     enum: AlertStatus,
     default: AlertStatus.UNACKNOWLEDGED,
   })
+  @Index()
   status: AlertStatus;
 
-  @Index()
   @Column("timestamp", { default: new Date().toISOString() })
   timestamp: Timestamp;
 
-  @Index()
   @ManyToOne(() => Application, { eager: true, cascade: true })
+  @Index()
   application: Application;
 
-  @Index()
-  @ManyToOne(() => User, { eager: true, onDelete: "SET NULL" })
+  @ManyToOne(() => User, { eager: true, onDelete: "SET NULL", nullable: true })
   user: User;
 
-  @Index()
   @Column({ nullable: true })
+  @Index()
   comment: string;
 
-  @Index()
   @Column()
+  @Index()
   hostname: string;
 
-  @Index()
   @Column()
+  @Index()
   file: string;
 
-  @Index()
   @Column()
+  @Index()
   changeAgent: string;
 
-  @Index()
   @Column()
+  @Index()
   changeProcess: string;
 
   @CreateDateColumn()

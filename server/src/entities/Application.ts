@@ -25,7 +25,6 @@ export class Application extends BaseEntity {
 
   @CreateDateColumn({ select: false })
   createdAt: Timestamp;
-
   @UpdateDateColumn({ select: false })
   updatedAt: Timestamp;
 }

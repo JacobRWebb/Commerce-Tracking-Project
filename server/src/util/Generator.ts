@@ -1,48 +1,110 @@
-import { date, git, internet, lorem, name, system } from "faker";
-import { getConnection } from "typeorm";
+import { date, git, internet, lorem, system } from "faker";
+import { createQueryBuilder, In, Not } from "typeorm";
 import { Alert, AlertStatus, Application, User, UserRole } from "../entities";
+import { generateID } from "./Basic";
 
 export default class Generator {
-  appliedApplications: Application[] = [];
-
   base = async () => {
-    if (!getConnection().isConnected) return;
-    await Alert.delete({}).catch((error) => console.error(error));
-    await Application.delete({}).catch((error) => console.error(error));
-    await User.delete({}).catch((error) => console.error(error));
+    console.log("Starting Data Creator");
 
-    await this.createApplications()
-      .finally(() => {
-        console.log("Fake applications created.");
-      })
-      .catch((err) => {
-        console.log("application creation error");
-        console.error(err);
-      });
-
-    await this.createUsers()
-      .finally(() => {
-        console.log("Fake users created.");
-      })
-      .catch((err) => {
-        console.log("user creation error");
-        console.error(err);
-      });
-
-    this.alertBuilder();
+    await this.deleteInOrder();
+    await this.checkDefaultAccounts();
+    await this.createApplications();
+    await this.createUsers();
+    await this.applyUserApplications();
+    await this.generateEntries();
   };
 
-  private generateID = (length: number): string => {
-    let auxiliary: string = "";
+  deleteInOrder = async () => {
+    await Alert.delete({}).catch((err) => console.error(err));
+    await Application.delete({ id: Not("ZZZ") }).catch((err) =>
+      console.error(err)
+    );
+    await User.delete({ username: Not(In(["user", "admin"])) }).catch((err) =>
+      console.error(err)
+    );
+    console.log("Done Deleting Entities");
+  };
 
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  checkDefaultAccounts = async () => {
+    let application = await Application.findOne({
+      where: { id: "ZZZ" },
+    }).catch((err) => console.error(err));
 
-    for (let i = 0; i < length; i++) {
-      auxiliary += characters[Math.floor(Math.random() * characters.length)];
+    if (!application) {
+      application = await Application.create({
+        name: "DEFAULT",
+        id: "ZZZ",
+      });
+      application.save().catch((err) => console.error(err));
     }
 
-    return auxiliary;
+    const userAccount = await User.findOne({
+      where: { username: "user" },
+    }).catch((err) => console.error(err));
+
+    if (!userAccount) {
+      const newUser = await User.create({ username: "user", password: "user" });
+      newUser.applications = [application];
+      await newUser.save().catch((err) => console.error(err));
+    }
+
+    const adminAccount = await User.findOne({
+      where: { username: "admin" },
+    }).catch((err) => console.error(err));
+
+    if (!adminAccount) {
+      const newUser = await User.create({
+        username: "admin",
+        password: "admin",
+        role: UserRole.ADMIN,
+      });
+      newUser.applications = [application];
+      await newUser.save();
+    }
+    console.log("Done Checking Default Accounts");
+  };
+
+  createApplications = async () => {
+    let auxiliaryApplications: Application[] = [];
+    for (let i = 0; i < Math.random() * 10; i++) {
+      auxiliaryApplications.push(
+        Application.create({
+          id: generateID(3),
+          name: internet.domainName(),
+        })
+      );
+    }
+    await createQueryBuilder()
+      .insert()
+      .into(Application)
+      .values(auxiliaryApplications)
+      .execute()
+      .catch((err) => console.error(err));
+
+    console.log("Done Creating Applications");
+  };
+
+  createUsers = async () => {
+    const auxiliaryUsers: User[] = [];
+
+    for (let i = 0; i < Math.random() * 20; i++) {
+      auxiliaryUsers.push(
+        User.create({
+          username: internet.userName(),
+          password: internet.password(),
+        })
+      );
+    }
+
+    await createQueryBuilder()
+      .insert()
+      .into(User)
+      .values(auxiliaryUsers)
+      .execute()
+      .catch((err) => console.error(err));
+
+    console.log("Done Creating Users");
   };
 
   private randomApplications = (applications: Application[]): Application[] => {
@@ -50,81 +112,50 @@ export default class Generator {
 
     for (let i = 0; i < applications.length; i++) {
       const index = Math.floor(Math.random() * applications.length);
+
       auxiliaryApplications.push(applications[index]);
       applications.splice(index, 1);
     }
+
     return auxiliaryApplications;
   };
 
-  private createApplications = async () => {
-    for (let i = 0; i < Math.floor(Math.random() * 10) + 5; i++) {
-      const application = Application.create({
-        id: this.generateID(3),
-        name: internet.domainWord(),
-      });
-
-      application.save();
-    }
-  };
-
-  private createUsers = async () => {
-    const applications: Application[] = await Application.find({});
-
-    let user: User = User.create({
-      username: "admin",
-      password: "admin",
-      role: UserRole.ADMIN,
-    });
-
-    user.applications = this.randomApplications(applications);
-    await user.save();
-
-    user = User.create({
-      username: "user",
-      password: "user",
-    });
-
-    user.applications = this.randomApplications(applications);
-    await user.save();
-
-    for (let i = 0; i < Math.floor(Math.random() * 20) + 10; i++) {
-      user = User.create({
-        username: name.firstName(),
-        password: internet.password(),
-        role:
-          Math.floor(Math.random() * 100) < 10 ? UserRole.ADMIN : UserRole.USER,
-      });
-
-      user.applications = this.randomApplications(applications);
-
+  applyUserApplications = async () => {
+    const applications = await Application.find({});
+    const users = await User.find({});
+    await users.map(async (user) => {
+      let apps = applications.map((app) => app);
+      user.applications = this.randomApplications(apps);
       await user.save();
-    }
+    });
+
+    console.log("Done Applying Applications");
   };
 
-  private alertBuilder = async () => {
+  generateEntries = async () => {
     const applications = await Application.find({});
     const users = await User.find({});
 
-    let auxilaryAlerts: Alert[] = [];
+    let auxiliaryArray: Alert[] = [];
 
-    for (let i = 0; i < Math.floor(Math.random() * 500); i++) {
+    for (let i = 0; i < Math.floor(Math.random() * 400); i++) {
       let status: AlertStatus = AlertStatus.UNACKNOWLEDGED;
       const x = Math.floor(Math.random() * 3) + 1;
       if (x === 2) status = AlertStatus.ACKNOWLEDGED;
       if (x === 3) status = AlertStatus.DECLINED;
 
-      auxilaryAlerts.push(
+      auxiliaryArray.push(
         Alert.create({
           status,
           comment:
             status === AlertStatus.UNACKNOWLEDGED
               ? undefined
-              : lorem.sentence(),
+              : lorem.sentences(2),
           user:
             status === AlertStatus.UNACKNOWLEDGED
               ? undefined
               : users[Math.floor(Math.random() * users.length)],
-          timestamp: date.recent(Math.floor(Math.random() * 100)),
+          timestamp: date.recent(20),
           hostname: internet.domainName(),
           file: system.filePath(),
           changeAgent: internet.userAgent(),
@@ -135,15 +166,12 @@ export default class Generator {
       );
     }
 
-    getConnection()
-      .createQueryBuilder()
+    createQueryBuilder()
       .insert()
       .into(Alert)
-      .values(auxilaryAlerts)
+      .values(auxiliaryArray)
       .execute()
       .catch(() => {})
-      .finally(() => {
-        setImmediate(this.alertBuilder, 1000);
-      });
+      .finally(() => setImmediate(this.generateEntries, 1000));
   };
 }

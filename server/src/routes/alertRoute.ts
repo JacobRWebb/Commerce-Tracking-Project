@@ -16,12 +16,12 @@ router.post("/get", Auth.IsAuth, async (req, res) => {
   });
 });
 
-router.post("/update", Auth.IsAuth, async (_req, res) => {
-  if (!res._User) return res.json({ success: false });
-  const result = false;
-  // await AlertController.update(req.body, res._User);
-  return res.json({ success: result });
-});
+// router.post("/update", Auth.IsAuth, async (_req, res) => {
+//   if (!res._User) return res.json({ success: false });
+//   const result = false;
+//   // await AlertController.update(req.body, res._User);
+//   return res.json({ success: result });
+// });
 
 router.post("/", Auth.IsAuth, async (req, res) => {
   if (!res._User) return res.json({ success: false });

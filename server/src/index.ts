@@ -23,11 +23,11 @@ main()
     applyMiddleware(preMiddleware, app);
     app.use(routes);
 
+    const generator = new Generator();
+    await generator.base();
+
     app.listen(PORT, () => {
       console.log(`\nServer is running.\nhttp://localhost:${PORT}/\n`);
     });
-
-    const generator = new Generator();
-    await generator.base();
   })
   .catch(() => {});

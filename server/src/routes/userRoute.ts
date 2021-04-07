@@ -5,7 +5,7 @@ import { Auth } from "../middleware";
 const router = Router();
 
 router.get("/", Auth.IsAuth, (_req, res: Response) => {
-  res.json({ success: true, user: res._User });
+  res.json({ ...res._User });
 });
 
 router.post("/login", Auth.nonLogged, async (req, res) => {
@@ -16,8 +16,7 @@ router.post("/login", Auth.nonLogged, async (req, res) => {
   if (check) {
     const { token, user } = check;
     return res.status(200).cookie("token", token, { httpOnly: true }).json({
-      success: true,
-      role: user.role,
+      user,
     });
   }
 
