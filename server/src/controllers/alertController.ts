@@ -26,9 +26,7 @@ const defaultFilter: IFilter = {
 const alertController = {
   getAll: async (user: User, inboundFilter: Partial<IFilter>) => {
     const start = Date.now();
-
     const filter: IFilter = { ...defaultFilter, ...inboundFilter };
-
     const timeConstraint = new Date();
     timeConstraint.setDate(timeConstraint.getDate() - USER_DAY_THRESHOLD);
 
@@ -39,7 +37,7 @@ const alertController = {
       .where(
         new Brackets((qb) => {
           if (filter.extended && user.role === UserRole.ADMIN) {
-            return qb.where("alert IS NOT NULL");
+            return qb.where("alert.status != :s", { s: AlertStatus.ALL });
           } else {
             return qb.where("alert.application.id IN (:...apps)", {
               apps: [...user.applications.map((app) => app.id)],
@@ -50,7 +48,7 @@ const alertController = {
       .andWhere(
         new Brackets((qb) => {
           if (filter.status === AlertStatus.ALL) {
-            return qb.where("alert.status IS NOT NULL");
+            return qb.where("alert.status != :s", { s: AlertStatus.ALL });
           } else {
             return qb.where("alert.status = :status", {
               status: filter.status,
@@ -95,7 +93,6 @@ const alertController = {
       .skip(filter.offset)
       .orderBy("alert.timestamp", filter.time)
       .getManyAndCount();
-
     console.log(`Queries: ${query[1]}`);
     console.log(`Time taken ${Date.now() - start}/ms`);
     return query;

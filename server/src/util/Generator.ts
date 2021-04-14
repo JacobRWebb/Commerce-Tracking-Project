@@ -1,5 +1,5 @@
 import { date, git, internet, lorem, system } from "faker";
-import { createQueryBuilder, In, Not } from "typeorm";
+import { createQueryBuilder, getConnection } from "typeorm";
 import { Alert, AlertStatus, Application, User, UserRole } from "../entities";
 import { generateID } from "./Basic";
 
@@ -16,52 +16,31 @@ export default class Generator {
   };
 
   deleteInOrder = async () => {
-    await Alert.delete({}).catch((err) => console.error(err));
-    await Application.delete({ id: Not("ZZZ") }).catch((err) =>
-      console.error(err)
-    );
-    await User.delete({ username: Not(In(["user", "admin"])) }).catch((err) =>
-      console.error(err)
-    );
+    await getConnection().dropDatabase();
+    await getConnection().runMigrations();
+
     console.log("Done Deleting Entities");
   };
 
   checkDefaultAccounts = async () => {
-    let application = await Application.findOne({
-      where: { id: "ZZZ" },
-    }).catch((err) => console.error(err));
+    const application = Application.create({
+      name: "DEFAULT",
+      id: "ZZZ",
+    });
+    await application.save().catch((err) => console.error(err));
 
-    if (!application) {
-      application = Application.create({
-        name: "DEFAULT",
-        id: "ZZZ",
-      });
-      await application.save().catch((err) => console.error(err));
-    }
+    let newUser = await User.create({ username: "user", password: "user" });
+    newUser.applications = [application];
+    await newUser.save().catch((err) => console.error(err));
 
-    const userAccount = await User.findOne({
-      where: { username: "user" },
-    }).catch((err) => console.error(err));
+    newUser = await User.create({
+      username: "admin",
+      password: "admin",
+      role: UserRole.ADMIN,
+    });
+    newUser.applications = [application];
+    await newUser.save();
 
-    if (!userAccount) {
-      const newUser = await User.create({ username: "user", password: "user" });
-      newUser.applications = [application];
-      await newUser.save().catch((err) => console.error(err));
-    }
-
-    const adminAccount = await User.findOne({
-      where: { username: "admin" },
-    }).catch((err) => console.error(err));
-
-    if (!adminAccount) {
-      const newUser = await User.create({
-        username: "admin",
-        password: "admin",
-        role: UserRole.ADMIN,
-      });
-      newUser.applications = [application];
-      await newUser.save();
-    }
     console.log("Done Checking Default Accounts");
   };
 
