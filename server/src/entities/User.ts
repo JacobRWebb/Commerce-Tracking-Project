@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   ManyToMany,
   PrimaryGeneratedColumn,
   Timestamp,
@@ -16,9 +17,10 @@ export enum UserRole {
 }
 
 @Entity()
+@Index(["id", "username", "password", "role", "createdAt", "updatedAt"])
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: string;
 
   @Column({ unique: true })
   username: string;
@@ -31,9 +33,6 @@ export class User extends BaseEntity {
 
   @ManyToMany(() => Application, (application) => application.users)
   applications: Application[];
-
-  @Column({ type: "timestamp", default: new Date().toISOString() })
-  lastLogout: string;
 
   @CreateDateColumn({ select: false })
   createdAt: Timestamp;

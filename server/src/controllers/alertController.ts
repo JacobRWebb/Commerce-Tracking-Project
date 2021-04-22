@@ -1,4 +1,4 @@
-import { Brackets, getConnection } from "typeorm";
+import { Brackets, getRepository } from "typeorm";
 import { Alert, AlertStatus, User, UserRole } from "../entities";
 
 const USER_DAY_THRESHOLD = 2;
@@ -24,92 +24,101 @@ const defaultFilter: IFilter = {
 };
 
 const alertController = {
-  fetchAll: async (body: Object, user: User) => {
-    let filter: IFilter = { ...defaultFilter, ...body };
+  getAll: async (user: User, inboundFilter: Partial<IFilter>) => {
+    const start = Date.now();
+    const filter: IFilter = { ...defaultFilter, ...inboundFilter };
     const timeConstraint = new Date();
     timeConstraint.setDate(timeConstraint.getDate() - USER_DAY_THRESHOLD);
 
-    const connection = getConnection();
-
-    const y = await connection
-      .getRepository(Alert)
+    const query = await getRepository(Alert)
       .createQueryBuilder("alert")
       .leftJoinAndSelect("alert.user", "user")
       .leftJoinAndSelect("alert.application", "applications")
       .where(
         new Brackets((qb) => {
           if (filter.extended && user.role === UserRole.ADMIN) {
-            return qb.where("alert.application.id IS NOT NULL");
+            return qb.where("alert.status != :s", { s: AlertStatus.ALL });
+          } else {
+            return qb.where("alert.application.id IN (:...apps)", {
+              apps: [...user.applications.map((app) => app.id)],
+            });
           }
-          return qb.where("alert.application.id IN (:...apps)", {
-            apps: [
-              ...user.applications.map((app) => {
-                return app.id;
-              }),
-              "BASE",
-            ],
-          });
         })
       )
       .andWhere(
         new Brackets((qb) => {
-          if (filter.status === AlertStatus.ALL)
-            return qb.where("alert.status IS NOT NULL");
-          return qb.where("alert.status = :status", { status: filter.status });
+          if (filter.status === AlertStatus.ALL) {
+            return qb.where("alert.status != :s", { s: AlertStatus.ALL });
+          } else {
+            return qb.where("alert.status = :status", {
+              status: filter.status,
+            });
+          }
         })
       )
       .andWhere(
         new Brackets((qb) => {
-          if (filter.extended && user.role === UserRole.ADMIN)
+          if (filter.extended && user.role === UserRole.ADMIN) {
             return qb.where("alert.timestamp IS NOT NULL");
-          return qb.where("alert.timestamp >= :timestamp", {
-            timestamp: timeConstraint.toISOString(),
-          });
+          } else {
+            return qb.where("alert.timestamp >= :timestamp", {
+              timestamp: timeConstraint.toISOString(),
+            });
+          }
         })
       )
       .andWhere(
         new Brackets((qb) => {
-          if (filter.applicationID.length < 1)
+          if (filter.hostname.length < 1) {
             return qb.where("alert.hostname IS NOT NULL");
-          return qb.where("alert.application.id LIKE :appid", {
-            appid: `%${filter.applicationID}%`,
-          });
+          } else {
+            return qb.where("alert.hostname LIKE :hostname", {
+              hostname: `%${filter.hostname}%`,
+            });
+          }
         })
       )
       .andWhere(
         new Brackets((qb) => {
-          if (filter.hostname.length < 1)
-            return qb.where("alert.hostname IS NOT NULL");
-          return qb.where("alert.hostname LIKE :hostname", {
-            hostname: `%${filter.hostname}%`,
-          });
+          if (filter.applicationID.length < 1) {
+            return qb.where("alert.application.id IS NOT NULL");
+          } else {
+            return qb.where("alert.application.id LIKE :appID", {
+              appID: `%${filter.applicationID}%`,
+            });
+          }
         })
       )
-      .orderBy("alert.timestamp", filter.time)
       .take(filter.take)
       .skip(filter.offset)
-      .getManyAndCount()
-      .catch(() => {
-        console.log("Alert Controller error while fetching entries.");
-      });
-
-    return y;
+      .orderBy("alert.timestamp", filter.time)
+      .getManyAndCount();
+    console.log(`Queries: ${query[1]}`);
+    console.log(`Time taken ${Date.now() - start}/ms`);
+    return query;
   },
-  update: async (
-    body: {
-      alertID: string | undefined;
-      comment: string | undefined;
-      status: AlertStatus | undefined;
-    },
-    user: User
-  ): Promise<boolean> => {
-    console.log(body);
-    const { alertID, comment, status } = body;
-    if (alertID === undefined) return false;
-    const alert = await Alert.findOne({ where: { id: alertID } });
-    if (alert === undefined) return false;
-    if (comment !== undefined) alert.comment = comment;
-    if (status !== undefined) alert.status = status;
+  getOne: async (_user: User, id: string) => {
+    const alert = await Alert.findOne({ where: { id } });
+    return alert;
+  },
+  update: async (user: User, inboundAlertUpdate: Partial<Alert>) => {
+    const alert = await Alert.findOne({ where: { id: inboundAlertUpdate.id } });
+
+    if (!alert) return false;
+
+    const newStatus =
+      inboundAlertUpdate.status === null ||
+      inboundAlertUpdate.status === undefined
+        ? alert.status
+        : inboundAlertUpdate.status;
+    const newComment =
+      inboundAlertUpdate.comment === null ||
+      inboundAlertUpdate.comment === undefined
+        ? alert.comment
+        : inboundAlertUpdate.comment;
+
+    alert.status = newStatus;
+    alert.comment = newComment;
     alert.user = user;
     await alert.save();
 

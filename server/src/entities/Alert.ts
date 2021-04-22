@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   ManyToOne,
   PrimaryGeneratedColumn,
   Timestamp,
@@ -19,9 +20,23 @@ export enum AlertStatus {
 }
 
 @Entity()
+@Index([
+  "id",
+  "status",
+  "timestamp",
+  "application",
+  "user",
+  "comment",
+  "hostname",
+  "file",
+  "changeAgent",
+  "changeProcess",
+  "createdAt",
+  "updatedAt",
+])
 export class Alert extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: string;
 
   @Column({
     type: "enum",
@@ -36,7 +51,7 @@ export class Alert extends BaseEntity {
   @ManyToOne(() => Application, { eager: true, cascade: true })
   application: Application;
 
-  @ManyToOne(() => User, { eager: true, onDelete: "SET NULL" })
+  @ManyToOne(() => User, { eager: true, onDelete: "SET NULL", nullable: true })
   user: User;
 
   @Column({ nullable: true })
