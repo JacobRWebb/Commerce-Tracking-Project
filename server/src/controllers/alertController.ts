@@ -97,6 +97,33 @@ const alertController = {
     console.log(`Time taken ${Date.now() - start}/ms`);
     return query;
   },
+  getOne: async (_user: User, id: string) => {
+    const alert = await Alert.findOne({ where: { id } });
+    return alert;
+  },
+  update: async (user: User, inboundAlertUpdate: Partial<Alert>) => {
+    const alert = await Alert.findOne({ where: { id: inboundAlertUpdate.id } });
+
+    if (!alert) return false;
+
+    const newStatus =
+      inboundAlertUpdate.status === null ||
+      inboundAlertUpdate.status === undefined
+        ? alert.status
+        : inboundAlertUpdate.status;
+    const newComment =
+      inboundAlertUpdate.comment === null ||
+      inboundAlertUpdate.comment === undefined
+        ? alert.comment
+        : inboundAlertUpdate.comment;
+
+    alert.status = newStatus;
+    alert.comment = newComment;
+    alert.user = user;
+    await alert.save();
+
+    return true;
+  },
 };
 
 export default alertController;

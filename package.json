@@ -4,8 +4,11 @@
     "concurrently": "^5.3.0"
   },
   "scripts": {
-    "dev": "concurrently \"yarn --cwd next-client dev\" \"yarn --cwd server dev\"",
+    "dev": "concurrently \"yarn --cwd client dev\" \"yarn --cwd server dev\"",
     "setup": "yarn  && yarn --cwd client && yarn --cwd server"
   },
-  "dependencies": {}
+  "dependencies": {
+    "global": "^4.4.0",
+    "next": "^10.1.3"
+  }
 }

@@ -1,27 +1,28 @@
 import { Router } from "express";
 import { AlertController } from "../controllers";
-import { Alert } from "../entities";
 import { Auth } from "../middleware";
 
 const router = Router();
 
 router.post("/get", Auth.IsAuth, async (req, res) => {
-  const { alertId } = req.body;
-  const alert = await Alert.findOne({ where: { id: alertId } });
-  if (!alert) return res.json({ success: false });
+  if (!res._User) return res.status(401).end();
 
-  return res.json({
-    success: true,
-    alert,
-  });
+  const id: string = req.body.id || undefined;
+
+  const alert = await AlertController.getOne(res._User, id);
+
+  if (!alert) return res.status(400).end();
+
+  return res.json({ entry: alert });
 });
 
-// router.post("/update", Auth.IsAuth, async (_req, res) => {
-//   if (!res._User) return res.json({ success: false });
-//   const result = false;
-//   // await AlertController.update(req.body, res._User);
-//   return res.json({ success: result });
-// });
+router.post("/update", Auth.IsAuth, async (req, res) => {
+  if (!res._User) return res.status(401).end();
+
+  const change = await AlertController.update(res._User, req.body);
+
+  return res.json({ change });
+});
 
 router.post("/", Auth.IsAuth, async (req, res) => {
   if (!res._User) return res.json({ success: false });

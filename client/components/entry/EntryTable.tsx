@@ -1,22 +1,23 @@
 import { Box, Stack, Text } from "@chakra-ui/layout";
-import { SkeletonText } from "@chakra-ui/skeleton";
 import theme from "@chakra-ui/theme";
-import { FunctionComponent, useContext } from "react";
+import { FunctionComponent, useContext, useEffect } from "react";
 import { EntryContext } from "../../context/EntryContext";
+import { useUser } from "../../util/swrFunctions";
 import Entry from "./Entry";
 
 const EntryTable: FunctionComponent = () => {
   const context = useContext(EntryContext);
+  const { data, loading } = useUser();
+
+  useEffect(() => {
+    if (context) {
+      if (data && !loading) {
+        context.fetchEntries();
+      }
+    }
+  }, [data, loading]);
 
   if (!context) return <></>;
-
-  if (context.loading) {
-    return (
-      <SkeletonText spacing={6} noOfLines={10}>
-        Placeholder
-      </SkeletonText>
-    );
-  }
 
   if (context.entries.length < 1) {
     return (

@@ -46,7 +46,7 @@ export default class Generator {
 
   createApplications = async () => {
     let auxiliaryApplications: Application[] = [];
-    for (let i = 0; i < Math.random() * 10; i++) {
+    for (let i = 0; i < Math.floor(Math.random() * 10) + 5; i++) {
       auxiliaryApplications.push(
         Application.create({
           id: generateID(3),

@@ -28,16 +28,21 @@ const EntryModal: FunctionComponent = () => {
   );
 
   if (!context) return <></>;
-  if (!context.viewingEntry) return <></>;
+  if (!context.currentEntry) return <></>;
 
-  const entry = context.viewingEntry;
+  const entry = context.currentEntry;
   const statusTheme = StatusTheme(entry.status);
 
-  const submit = () => {};
+  const submit = () => {
+    const comment = tempComment.length > 1 ? tempComment : entry.comment;
+    const state = tempState !== undefined ? tempState : entry.status;
+
+    context.updateEntry({ comment, status: state, id: entry.id });
+  };
 
   return (
     <Modal
-      isOpen={context.viewingEntry !== undefined}
+      isOpen={context.currentEntry !== undefined}
       onClose={() => {
         setTempComment("");
         setTempState(undefined);
@@ -93,33 +98,36 @@ const EntryModal: FunctionComponent = () => {
               </Text>
               <Divider />
               <Text fontWeight="bold">Comment:</Text>
-              <Tooltip label="Click To Edit">
-                <Editable
-                  defaultValue={
-                    entry.comment === undefined ||
-                    entry.comment === null ||
-                    entry.comment.length < 1
-                      ? "Leave a comment"
-                      : entry.comment
-                  }
-                  width="100%"
-                  onSubmit={(value) => setTempComment(value)}
-                >
+              <Editable
+                defaultValue={
+                  entry.comment === undefined ||
+                  entry.comment === null ||
+                  entry.comment.length < 1
+                    ? ""
+                    : entry.comment
+                }
+                placeholder="Leave a comment!"
+                width="100%"
+                onSubmit={(value) => setTempComment(value)}
+              >
+                <Tooltip label="Click To Edit">
                   <EditablePreview
                     padding={1}
                     borderWidth={1}
                     borderRadius={3}
                     _hover={{ borderWidth: 1, borderColor: "black" }}
                     noOfLines={5}
-                    isTruncated={true}
+                    minHeight="fit-content"
                   />
-                  <EditableInput
-                    value={entry.comment}
-                    onChange={(event) => {}}
-                    as={Textarea}
-                  />
-                </Editable>
-              </Tooltip>
+                </Tooltip>
+                <EditableInput
+                  value={entry.comment}
+                  onChange={(event) => {}}
+                  as={Textarea}
+                  minHeight="100px"
+                  maxLength={600}
+                />
+              </Editable>
               <Divider />
               <Text fontWeight="bold">Status:</Text>
               <Stack direction="row">

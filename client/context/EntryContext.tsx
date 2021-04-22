@@ -1,11 +1,12 @@
+import { debounce } from "lodash";
 import React, { Component } from "react";
 import IEntry, { AlertStatus } from "../interface/IEntry";
 import IFilter from "../interface/IFilter";
 import { API_DOMAIN } from "../util/constants";
 
 export interface IEntryContext {
-  viewingEntry?: IEntry;
-  viewEntry: (entry?: IEntry) => void;
+  currentEntry?: IEntry;
+  viewEntry: (id?: string) => void;
   entries: IEntry[];
   count: number;
   loading: boolean;
@@ -14,11 +15,12 @@ export interface IEntryContext {
   filterOpen: boolean;
   setFilterOpen: (state?: boolean) => void;
   updateFilter: (newFilter: Partial<IFilter>) => void;
+  updateEntry: (newEntry: Partial<IEntry>) => void;
 }
 
 const defaultEntryContext: IEntryContext = {
-  viewingEntry: undefined,
-  viewEntry: () => {},
+  currentEntry: undefined,
+  viewEntry: (id?: string) => {},
   entries: [],
   count: 0,
   loading: true,
@@ -36,6 +38,7 @@ const defaultEntryContext: IEntryContext = {
   filterOpen: false,
   setFilterOpen: (state?: boolean) => {},
   updateFilter: () => {},
+  updateEntry: () => {},
 };
 
 export const EntryContext = React.createContext<IEntryContext>(
@@ -51,12 +54,9 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
       viewEntry: this.viewEntry,
       fetchEntries: this.fetchEntries,
       setFilterOpen: this.setFilterOpen,
-      updateFilter: this.updateFilter,
+      updateFilter: debounce(this.updateFilter, 50),
+      updateEntry: this.updateEntry,
     };
-  }
-
-  componentDidMount() {
-    this.fetchEntries();
   }
 
   setFilterOpen = (state?: boolean) => {
@@ -65,6 +65,11 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
   };
 
   updateFilter = (newFilter: Partial<IFilter>) => {
+    if (!newFilter.page) {
+      newFilter.page = 1;
+    }
+    newFilter.offset = (newFilter.page - 1) * this.state.filter.take;
+
     this.setState((prevState) => {
       return {
         filter: {
@@ -75,20 +80,61 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
     }, this.fetchEntries);
   };
 
-  viewEntry = (entry?: IEntry) => {
-    if (entry === undefined) {
-      this.setState({ viewingEntry: undefined });
+  updateEntry = (newEntry: Partial<IEntry>) => {
+    fetch(`${API_DOMAIN}/alert/update`, {
+      credentials: "include",
+      method: "POST",
+      body: JSON.stringify(newEntry),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((result) => {
+        if (result.status === 200) return result.json();
+      })
+      .then((data) => {
+        if (data !== undefined) {
+          this.fetchEntries();
+          this.viewEntry(newEntry.id);
+        }
+      })
+      .catch(() => {});
+  };
+
+  viewEntry = (id?: string) => {
+    if (id === undefined) {
+      this.setState({ currentEntry: undefined });
       return;
     }
-    this.setState({ viewingEntry: entry });
+
+    fetch(`${API_DOMAIN}/alert/get`, {
+      credentials: "include",
+      method: "POST",
+      body: JSON.stringify({ id: id }),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((result) => {
+        if (result.status === 200) return result.json();
+      })
+      .then((data) => {
+        if (data !== undefined) {
+          this.setState({ currentEntry: data.entry });
+        }
+      })
+      .catch(() => {});
   };
 
   fetchEntries = () => {
-    this.setState({ loading: true });
+    let filter: IFilter = this.state.filter;
+
+    if (!filter.page) {
+      filter.page = 1;
+    }
+
+    filter.offset = (filter.page - 1) * filter.take;
+
     fetch(`${API_DOMAIN}/alert`, {
       credentials: "include",
       method: "POST",
-      body: JSON.stringify(this.state.filter),
+      body: JSON.stringify(filter),
       headers: { "Content-Type": "application/json" },
     })
       .then((result) => {
@@ -96,10 +142,18 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
       })
       .then((data) => {
         if (data) {
-          this.setState({ entries: data.alerts, count: data.count });
+          this.setState((prevState) => {
+            return {
+              entries: data.alerts,
+              count: data.count,
+              filter: {
+                ...prevState.filter,
+                extended: filter.extended,
+              },
+            };
+          });
         }
       })
-      .finally(() => this.setState({ loading: false }))
       .catch(() => {});
   };
 

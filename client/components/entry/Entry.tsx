@@ -14,6 +14,14 @@ const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
   index,
 }) => {
   const context = useContext(EntryContext);
+
+  if (!context)
+    return (
+      <>
+        <p>Context ERROR</p>
+      </>
+    );
+
   const statusTheme = StatusTheme(entry.status);
 
   return (
@@ -33,7 +41,7 @@ const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
         borderRightColor: theme.colors.gray[500],
       }}
     >
-      <Stack direction="column" width={[200, 200, 300]}>
+      <Stack direction="column" width={[200, 200, 320]}>
         <Alert
           padding="unset"
           backgroundColor="unset"
@@ -42,21 +50,23 @@ const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
           <AlertIcon />
           <Text>{entry.status}</Text>
         </Alert>
-        <Text isTruncated>File Path: {entry.file}</Text>
+        <Text noOfLines={3} overflowWrap="break-word">
+          File Path: {entry.file}
+        </Text>
       </Stack>
       <Stack
         display={["none", "unset"]}
         direction="column"
-        width={[150, 180]}
+        width={[0, 130, 180, 200]}
         overflow="hidden"
       >
-        <Text isTruncated={true}>Application ID: {entry.application.id}</Text>
-        <Text isTruncated={true}>Hostname: {entry.hostname}</Text>
+        <Text noOfLines={2}>Application ID: {entry.application.id}</Text>
+        <Text noOfLines={2}>Hostname: {entry.hostname}</Text>
       </Stack>
       <Stack
         display={["none", "none", "none", "unset"]}
         direction="column"
-        width={[200, 250]}
+        width={[0, 0, 0, 300]}
         overflow="hidden"
       >
         <Text isTruncated={true}>
@@ -72,7 +82,7 @@ const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
         colorScheme="blue"
         onClick={() => {
           mutate("/user");
-          context.viewEntry(entry);
+          context.viewEntry(entry.id);
         }}
       >
         Edit

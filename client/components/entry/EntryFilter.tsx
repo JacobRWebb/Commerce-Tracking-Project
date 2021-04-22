@@ -17,7 +17,7 @@ import {
   NumberInputStepper,
 } from "@chakra-ui/number-input";
 import theme from "@chakra-ui/theme";
-import { FunctionComponent, useContext } from "react";
+import { FunctionComponent, useContext, useEffect } from "react";
 import { EntryContext } from "../../context/EntryContext";
 import { AlertStatus } from "../../interface/IEntry";
 
@@ -26,6 +26,19 @@ const EntryFilter: FunctionComponent = () => {
   if (!context) return <></>;
 
   const maxPage = Math.ceil(context.count / context.filter.take);
+
+  useEffect(() => {
+    const pathName = window.location.pathname;
+    if (context.filter.extended) {
+      if (pathName !== "/admin") {
+        context.updateFilter({ extended: false });
+      }
+    } else {
+      if (pathName === "/admin") {
+        context.updateFilter({ extended: true });
+      }
+    }
+  }, [context.filter]);
 
   return (
     <Stack direction="column">
@@ -36,8 +49,12 @@ const EntryFilter: FunctionComponent = () => {
         direction="row"
         justify="space-between"
       >
-        <Button onClick={() => context.setFilterOpen()}>Filter</Button>
-        <Button onClick={() => context.fetchEntries()}>Refresh</Button>
+        <Button onClick={() => context.setFilterOpen()} colorScheme="blue">
+          Filter
+        </Button>
+        <Button onClick={() => context.fetchEntries()} colorScheme="blue">
+          Refresh
+        </Button>
       </Stack>
       <Stack
         display={context.entries.length < 1 ? "none" : "flex"}
@@ -50,9 +67,6 @@ const EntryFilter: FunctionComponent = () => {
           onClick={() =>
             context.updateFilter({
               page: context.filter.page - 1,
-              offset: Math.floor(
-                context.filter.take * (context.filter.page - 2)
-              ),
             })
           }
         >
@@ -70,14 +84,12 @@ const EntryFilter: FunctionComponent = () => {
               if (context.filter.page === maxPage) return;
               context.updateFilter({
                 page: maxPage,
-                offset: Math.floor(context.filter.take * (maxPage - 1)),
               });
             } else if (n < 1) {
-              context.updateFilter({ page: 1, offset: 0 });
+              context.updateFilter({ page: 1 });
             } else {
               context.updateFilter({
                 page: n,
-                offset: (context.filter.page - 1) * 25,
               });
             }
           }}
@@ -91,12 +103,9 @@ const EntryFilter: FunctionComponent = () => {
         <Text> / {maxPage}</Text>
         <Button
           disabled={context.filter.page >= maxPage}
-          onClick={() =>
-            context.updateFilter({
-              page: context.filter.page + 1,
-              offset: Math.floor(context.filter.take * context.filter.page),
-            })
-          }
+          onClick={() => {
+            context.updateFilter({ page: context.filter.page + 1 });
+          }}
         >
           Next Page
         </Button>
@@ -223,20 +232,6 @@ const EntryFilter: FunctionComponent = () => {
                 </Stack>
                 <Divider marginTop={2} />
                 <Text fontSize="xl" textAlign="center" marginBottom={4}>
-                  Search By Hostname:
-                </Text>
-                <Input
-                  textAlign="center"
-                  value={context.filter.hostname}
-                  onChange={(event) =>
-                    context.updateFilter({
-                      hostname: event.target.value,
-                    })
-                  }
-                  placeholder="Hostname"
-                />
-                <Divider marginTop={2} />
-                <Text fontSize="xl" textAlign="center" marginBottom={4}>
                   Search By Application ID:
                 </Text>
                 <Input
@@ -249,6 +244,20 @@ const EntryFilter: FunctionComponent = () => {
                     })
                   }
                   placeholder="ABC"
+                />
+                <Divider marginTop={2} />
+                <Text fontSize="xl" textAlign="center" marginBottom={4}>
+                  Search By Hostname:
+                </Text>
+                <Input
+                  textAlign="center"
+                  value={context.filter.hostname}
+                  onChange={(event) =>
+                    context.updateFilter({
+                      hostname: event.target.value,
+                    })
+                  }
+                  placeholder="Hostname"
                 />
               </Stack>
             </DrawerBody>

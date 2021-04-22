@@ -17,14 +17,6 @@ const UserController = {
 
     return false;
   },
-  logout: async (username: string) => {
-    username;
-    // const user = await User.findOne({ where: { username } });
-    // if (user) {
-    //   user.lastLogout = moment().format();
-    //   await user.save();
-    // }
-  },
 };
 
 export default UserController;
