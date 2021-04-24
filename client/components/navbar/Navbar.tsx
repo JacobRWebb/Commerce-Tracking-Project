@@ -28,8 +28,6 @@ const Navbar: FunctionComponent = () => {
       borderTopWidth="2px"
       boxShadow="lg"
       align="center"
-      position="sticky"
-      top="0"
       zIndex={2}
     >
       <Stack

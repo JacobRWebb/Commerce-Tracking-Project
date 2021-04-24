@@ -1,3 +1,4 @@
+import { Box } from "@chakra-ui/layout";
 import { useRouter } from "next/router";
 import { FunctionComponent, useEffect } from "react";
 import EntryFilter from "../components/entry/EntryFilter";
@@ -21,16 +22,40 @@ const Home: FunctionComponent = () => {
   if (loading || !data) return <></>;
 
   return (
-    <>
+    <Box
+      height="100vh"
+      width="100vw"
+      display="flex"
+      flexDirection="column"
+      overflowX="hidden"
+    >
       <Navbar />
-      <EntryContextProvider>
-        <Layout>
+      <Layout>
+        <EntryContextProvider>
           <EntryFilter />
-          <EntryTable />
           <EntryModal />
-        </Layout>
-      </EntryContextProvider>
-    </>
+          <Box
+            marginTop="22px"
+            flexGrow={1}
+            overflowX="hidden"
+            overflowY="auto"
+            borderRadius="5px"
+            sx={{
+              "&::-webkit-scrollbar": {
+                width: "11px",
+                borderRadius: "5px",
+                backgroundColor: `rgba(0, 0, 0, 0.05)`,
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: `rgb(197, 197, 197)`,
+              },
+            }}
+          >
+            <EntryTable />
+          </Box>
+        </EntryContextProvider>
+      </Layout>
+    </Box>
   );
 };
 
