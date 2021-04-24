@@ -69,88 +69,98 @@ const Login: FunctionComponent = () => {
         transform="translate(-50%, -50%);"
         backgroundColor="white"
         borderWidth="3px"
-        borderRadius="10px"
+        borderRadius="5px"
         borderColor="gray.100"
-        borderTopColor="green.500"
         boxShadow="2xl"
         minWidth="320px"
         maxWidth="600px"
         width="35%"
-        padding="22px"
         as="form"
         spacing="22px"
+        overflow="hidden"
         onSubmit={submit}
       >
         <Text
+          backgroundColor="green.500"
           fontWeight="bold"
           fontSize="1.8rem"
           textAlign="center"
-          color="gray.700"
-          margin="22px 0px 22px 0px"
+          color="white"
+          borderBottomWidth="3px"
+          borderBottomColor="gray.100"
         >
-          Welcome back please login!
+          ATAS Login
         </Text>
-        <InputGroup>
-          <InputLeftElement children={<AtSignIcon color="gray.400" />} />
-          <Input
-            required
-            name="username"
-            placeholder="Username"
-            value={username}
-            type="text"
-            autoComplete="username"
-            onChange={(event) => setUsername(event.target.value)}
-            disabled={fetching ? true : false}
-          />
-        </InputGroup>
-        <InputGroup>
-          <InputLeftElement children={<LockIcon color="gray.400" />} />
-          <Input
-            required
-            name="password"
-            placeholder="Password"
-            value={password}
-            type={showPassword ? "text" : "password"}
-            autoComplete="password"
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={fetching ? true : false}
-          />
-          <InputRightElement
-            width="50px"
-            marginRight="10px"
-            children={
-              <Button
-                backgroundColor="gray.600"
-                color="white"
-                disabled={fetching ? true : false}
-                height="30px"
-                size="sm"
-                onClick={() => setShowPassword(!showPassword)}
-                _hover={{
-                  backgroundColor: "gray.500",
-                }}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </Button>
-            }
-          />
-        </InputGroup>
-        {error !== undefined ? (
-          <Text fontSize="1.1rem" color="red.500">
-            {error}
-          </Text>
-        ) : (
-          <></>
-        )}
-        <Stack direction="row" justify="flex-end">
-          <Button
-            colorScheme="blue"
-            type="submit"
-            width="100px"
-            disabled={fetching ? true : false}
-          >
-            Login!
-          </Button>
+        <Stack padding="0px 22px 22px 22px" spacing="22px">
+          <InputGroup>
+            <InputLeftElement children={<AtSignIcon color="gray.400" />} />
+            <Input
+              required
+              name="username"
+              placeholder="Username"
+              value={username}
+              type="text"
+              autoComplete="username"
+              onChange={(event) => setUsername(event.target.value)}
+              disabled={fetching ? true : false}
+            />
+          </InputGroup>
+          <InputGroup>
+            <InputLeftElement children={<LockIcon color="gray.400" />} />
+            <Input
+              required
+              name="password"
+              placeholder="Password"
+              value={password}
+              type={showPassword ? "text" : "password"}
+              autoComplete="password"
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={fetching ? true : false}
+            />
+            <InputRightElement
+              width="50px"
+              marginRight="10px"
+              children={
+                <Button
+                  backgroundColor="gray.600"
+                  color="white"
+                  disabled={fetching ? true : false}
+                  height="30px"
+                  size="sm"
+                  onClick={() => setShowPassword(!showPassword)}
+                  _hover={{
+                    backgroundColor: "gray.500",
+                  }}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </Button>
+              }
+            />
+          </InputGroup>
+          {error !== undefined ? (
+            <Text fontSize="1.1rem" color="red.500">
+              {error}
+            </Text>
+          ) : (
+            <></>
+          )}
+          <Stack direction="column" align="flex-end" spacing="22px">
+            <Text
+              variant="ghost"
+              color="gray.500"
+              _hover={{ color: "gray.400", cursor: "pointer" }}
+            >
+              Forgot your password?
+            </Text>
+            <Button
+              colorScheme="blue"
+              type="submit"
+              width="100px"
+              disabled={fetching ? true : false}
+            >
+              Login!
+            </Button>
+          </Stack>
         </Stack>
       </Stack>
     </Box>
