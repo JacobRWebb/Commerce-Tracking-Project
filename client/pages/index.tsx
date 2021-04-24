@@ -1,35 +1,36 @@
-import { Box } from "@chakra-ui/layout";
-import { SkeletonText } from "@chakra-ui/skeleton";
 import { useRouter } from "next/router";
 import { FunctionComponent, useEffect } from "react";
 import EntryFilter from "../components/entry/EntryFilter";
 import EntryModal from "../components/entry/EntryModal";
 import EntryTable from "../components/entry/EntryTable";
+import Layout from "../components/Layout";
+import Navbar from "../components/navbar/Navbar";
+import EntryContextProvider from "../context/EntryContext";
 import { useUser } from "../util/swrFunctions";
 
 const Home: FunctionComponent = () => {
-  const { data, loading } = useUser();
   const router = useRouter();
+  const { data, loading } = useUser();
 
   useEffect(() => {
-    if (!data && !loading) router.push("/login");
+    if (!loading && data === undefined) {
+      router.push("/login");
+    }
   }, [data, loading]);
 
-  if (!data)
-    return (
-      <Box paddingTop="1%" paddingLeft="10%" paddingRight="10%">
-        <SkeletonText spacing={6} noOfLines={10}>
-          Placeholder
-        </SkeletonText>
-      </Box>
-    );
+  if (loading || !data) return <></>;
 
   return (
-    <Box padding="1%" paddingLeft="10%" paddingRight="10%">
-      <EntryFilter />
-      <EntryTable />
-      <EntryModal />
-    </Box>
+    <>
+      <Navbar />
+      <EntryContextProvider>
+        <Layout>
+          <EntryFilter />
+          <EntryTable />
+          <EntryModal />
+        </Layout>
+      </EntryContextProvider>
+    </>
   );
 };
 
