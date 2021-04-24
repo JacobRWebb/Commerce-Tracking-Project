@@ -21,7 +21,7 @@ const NavUser: FunctionComponent<{ user: Iuser }> = ({ user, children }) => {
         <Avatar src="/fakeMan.jpg" width="40px" height="40px" />
       </Stack>
       <Stack
-        paddingTop="5px"
+        padding="5px"
         display={avatarDropdown ? "block" : "none"}
         spacing={2}
         direction="column"
