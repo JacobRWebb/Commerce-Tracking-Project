@@ -14,11 +14,15 @@ const Admin: FunctionComponent = () => {
   const { data, loading } = useUser();
 
   useEffect(() => {
-    if (!loading && data === undefined) {
-      router.push("/login");
-    }
+    if (!loading) {
+      if (!data) {
+        router.push("/login");
+      }
 
-    if (data.role !== IRole.ADMIN) router.push("/");
+      if (data.role) {
+        if (data.role !== IRole.ADMIN) router.push("/");
+      }
+    }
   }, [data, loading]);
 
   if (loading || !data) return <></>;
