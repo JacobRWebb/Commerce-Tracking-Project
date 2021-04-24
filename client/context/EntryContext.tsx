@@ -131,6 +131,8 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
 
     filter.offset = (filter.page - 1) * filter.take;
 
+    this.setState({ loading: true });
+
     fetch(`${API_DOMAIN}/alert`, {
       credentials: "include",
       method: "POST",
@@ -154,7 +156,10 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
           });
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        this.setState({ loading: false });
+      });
   };
 
   render() {

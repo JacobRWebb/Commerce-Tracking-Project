@@ -19,7 +19,7 @@ const EntryTable: FunctionComponent = () => {
 
   if (!context) return <></>;
 
-  if (context.entries.length < 1) {
+  if (context.entries.length < 1 && !context.loading) {
     return (
       <Box
         backgroundColor={theme.colors.gray[200]}
