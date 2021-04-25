@@ -1,10 +1,11 @@
 import { AtSignIcon, LockIcon } from "@chakra-ui/icons";
 import { Input, InputGroup } from "@chakra-ui/input";
-import { Box, Stack, Text } from "@chakra-ui/layout";
+import { Box, Link, Stack, Text } from "@chakra-ui/layout";
 import { Button, InputLeftElement, InputRightElement } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { mutate } from "swr";
+import Container from "../components/Container";
 import { API_DOMAIN } from "../util/constants";
 import { useUser } from "../util/swrFunctions";
 
@@ -61,37 +62,33 @@ const Login: FunctionComponent = () => {
   };
 
   return (
-    <Box width="100vw" height="100vh" position="relative">
-      <Stack
-        position="absolute"
-        top="45%"
-        left="50%"
-        transform="translate(-50%, -50%);"
-        backgroundColor="white"
-        borderWidth="3px"
-        borderRadius="5px"
-        borderColor="gray.100"
-        boxShadow="2xl"
+    <Box width="100vw" height="100vh">
+      <Container
+        padding="0px 0px 11px 0px"
+        spacing="11px"
         minWidth="320px"
         maxWidth="600px"
-        width="35%"
-        as="form"
-        spacing="22px"
+        width="45%"
+        position="absolute"
+        top="30%"
+        left="50%"
+        transform="translate(-50%, -50%);"
         overflow="hidden"
+        boxShadow="2xl"
+        as="form"
         onSubmit={submit}
       >
         <Text
-          backgroundColor="green.500"
+          padding="11px 0px 11px 0px"
           fontWeight="bold"
           fontSize="1.8rem"
           textAlign="center"
+          backgroundColor="green.500"
           color="white"
-          borderBottomWidth="3px"
-          borderBottomColor="gray.100"
         >
           ATAS Login
         </Text>
-        <Stack padding="0px 22px 22px 22px" spacing="22px">
+        <Stack spacing="11px" direction="column" padding="0px 11px 0px 11px">
           <InputGroup>
             <InputLeftElement children={<AtSignIcon color="gray.400" />} />
             <Input
@@ -144,25 +141,24 @@ const Login: FunctionComponent = () => {
           ) : (
             <></>
           )}
-          <Stack direction="column" align="flex-end" spacing="22px">
-            <Text
-              variant="ghost"
-              color="gray.500"
-              _hover={{ color: "gray.400", cursor: "pointer" }}
-            >
-              Forgot your password?
-            </Text>
-            <Button
-              colorScheme="blue"
-              type="submit"
-              width="100px"
-              disabled={fetching ? true : false}
-            >
-              Login!
-            </Button>
-          </Stack>
         </Stack>
-      </Stack>
+        <Stack
+          direction="column"
+          align="flex-end"
+          spacing="11px"
+          padding="0px 11px 0px 11px"
+        >
+          <Link>Forgot your password?</Link>
+          <Button
+            colorScheme="blue"
+            type="submit"
+            width="100px"
+            disabled={fetching ? true : false}
+          >
+            Login!
+          </Button>
+        </Stack>
+      </Container>
     </Box>
   );
 };
