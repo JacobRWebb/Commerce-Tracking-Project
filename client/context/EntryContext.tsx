@@ -124,6 +124,7 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
 
   fetchEntries = () => {
     let filter: IFilter = this.state.filter;
+    filter.extended = window.location.pathname === "/admin" ? true : false;
 
     if (!filter.page) {
       filter.page = 1;

@@ -7,8 +7,8 @@ const Container: FunctionComponent<StackProps> = ({
 }) => {
   return (
     <Stack
+      backgroundColor="white"
       boxShadow="lg"
-      margin="22px"
       borderWidth="3px"
       borderRadius="5px"
       borderColor="gray.100"

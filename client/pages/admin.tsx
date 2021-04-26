@@ -1,9 +1,11 @@
+import { Box, Stack } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React, { FunctionComponent, useEffect } from "react";
-import EntryFilter from "../components/entry/EntryFilter";
+import Content from "../components/Content";
 import EntryModal from "../components/entry/EntryModal";
 import EntryTable from "../components/entry/EntryTable";
-import Layout from "../components/Layout";
+import Filter from "../components/entry/Filter";
+import Pagination from "../components/entry/Pagination";
 import Navbar from "../components/navbar/Navbar";
 import EntryContextProvider from "../context/EntryContext";
 import IRole from "../interface/IRole";
@@ -28,16 +30,19 @@ const Admin: FunctionComponent = () => {
   if (loading || !data) return <></>;
 
   return (
-    <>
+    <Box height="100vh" width="100vw" overflowX="hidden">
       <Navbar />
-      <EntryContextProvider>
-        <Layout>
-          <EntryFilter />
-          <EntryTable />
+      <Content>
+        <EntryContextProvider>
+          <Stack direction="column" spacing="22px">
+            <Filter />
+            <Pagination />
+            <EntryTable />
+          </Stack>
           <EntryModal />
-        </Layout>
-      </EntryContextProvider>
-    </>
+        </EntryContextProvider>
+      </Content>
+    </Box>
   );
 };
 

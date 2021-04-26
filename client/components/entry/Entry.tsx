@@ -8,6 +8,7 @@ import { mutate } from "swr";
 import { EntryContext } from "../../context/EntryContext";
 import IEntry from "../../interface/IEntry";
 import { StatusTheme } from "../../util/statusTheme";
+import Container from "../Container";
 
 const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
   entry,
@@ -25,15 +26,12 @@ const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
   const statusTheme = StatusTheme(entry.status);
 
   return (
-    <Stack
+    <Container
       align="center"
       backgroundColor={index % 2 === 0 ? "gray.300" : "gray.100"}
       direction="row"
-      spacing={0}
       justify="space-between"
       overflow="hidden"
-      borderRadius={3}
-      borderWidth={3}
       borderColor="transparent"
       borderLeftColor={statusTheme.borderColor}
       padding={2}
@@ -87,7 +85,7 @@ const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
       >
         Edit
       </Button>
-    </Stack>
+    </Container>
   );
 };
 
