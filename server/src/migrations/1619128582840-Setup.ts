@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class Setup1617803008766 implements MigrationInterface {
-    name = 'Setup1617803008766'
+export class Setup1619128582840 implements MigrationInterface {
+    name = 'Setup1619128582840'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TYPE "user_role_enum" AS ENUM('admin', 'user')`);
@@ -10,7 +10,7 @@ export class Setup1617803008766 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "application" ("id" text NOT NULL, "name" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_608bb41e7e1ef5f6d7abb07e394" UNIQUE ("name"), CONSTRAINT "PK_569e0c3e863ebdf5f2408ee1670" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "IDX_1f517d97a6b4c1e521545b4102" ON "application" ("id", "name", "createdAt", "updatedAt") `);
         await queryRunner.query(`CREATE TYPE "alert_status_enum" AS ENUM('all', 'acknowledged', 'un-acknowledged', 'declined')`);
-        await queryRunner.query(`CREATE TABLE "alert" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "status" "alert_status_enum" NOT NULL DEFAULT 'un-acknowledged', "timestamp" TIMESTAMP NOT NULL DEFAULT '2021-04-07T13:43:28.873Z', "comment" character varying, "hostname" character varying NOT NULL, "file" character varying NOT NULL, "changeAgent" character varying NOT NULL, "changeProcess" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "applicationId" text, "userId" uuid, CONSTRAINT "PK_ad91cad659a3536465d564a4b2f" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "alert" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "status" "alert_status_enum" NOT NULL DEFAULT 'un-acknowledged', "timestamp" TIMESTAMP NOT NULL DEFAULT '2021-04-22T21:56:22.969Z', "comment" character varying, "hostname" character varying NOT NULL, "file" character varying NOT NULL, "changeAgent" character varying NOT NULL, "changeProcess" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "applicationId" text, "userId" uuid, CONSTRAINT "PK_ad91cad659a3536465d564a4b2f" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "IDX_0832410e6990dfc35cc37b6a95" ON "alert" ("id", "status", "timestamp", "applicationId", "userId", "comment", "hostname", "file", "changeAgent", "changeProcess", "createdAt", "updatedAt") `);
         await queryRunner.query(`CREATE TABLE "application_users_user" ("applicationId" text NOT NULL, "userId" uuid NOT NULL, CONSTRAINT "PK_d6661c46a5d2fbbff17d460111e" PRIMARY KEY ("applicationId", "userId"))`);
         await queryRunner.query(`CREATE INDEX "IDX_07b93bc85050d15c9dd0b968d0" ON "application_users_user" ("applicationId") `);

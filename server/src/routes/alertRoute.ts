@@ -1,6 +1,8 @@
 import { Router } from "express";
+import multer from "multer";
 import { AlertController } from "../controllers";
 import { Auth } from "../middleware";
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
 
@@ -22,6 +24,10 @@ router.post("/update", Auth.IsAuth, async (req, res) => {
   const change = await AlertController.update(res._User, req.body);
 
   return res.json({ change });
+});
+
+router.post("/submit", upload.single("alert"), (_req, res) => {
+  return res.json({ info: "submit API" });
 });
 
 router.post("/", Auth.IsAuth, async (req, res) => {

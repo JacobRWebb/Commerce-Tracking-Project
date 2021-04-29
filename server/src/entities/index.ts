@@ -8,9 +8,7 @@ export const establishConnection = async () => {
   await createConnection().catch(() => {});
   await getConnection()
     .runMigrations()
-    .catch((err) => {
-      console.error(err);
-    });
+    .catch(() => {});
 
   setInterval(async () => {
     if (!getConnection().isConnected) {

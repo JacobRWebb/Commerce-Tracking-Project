@@ -1,17 +1,22 @@
-import useRouter from "next/router";
+import { useRouter } from "next/router";
 import { FunctionComponent, useEffect } from "react";
-import { mutate } from "swr";
 import { API_DOMAIN } from "../util/constants";
+import { useUser } from "../util/swrFunctions";
 
 const Logout: FunctionComponent = () => {
+  const { mutate } = useUser();
+  const router = useRouter();
+
   useEffect(() => {
     fetch(`${API_DOMAIN}/user/logout`, {
       credentials: "include",
     })
-      .catch(() => {})
-      .finally(() => {
-        mutate("/user");
-        useRouter.push("/");
+      .then(() => {
+        mutate(undefined);
+        router.push("/login");
+      })
+      .catch(() => {
+        //  Does not matter here!
       });
   });
   return <></>;

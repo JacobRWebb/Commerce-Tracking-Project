@@ -124,12 +124,15 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
 
   fetchEntries = () => {
     let filter: IFilter = this.state.filter;
+    filter.extended = window.location.pathname === "/admin" ? true : false;
 
     if (!filter.page) {
       filter.page = 1;
     }
 
     filter.offset = (filter.page - 1) * filter.take;
+
+    this.setState({ loading: true });
 
     fetch(`${API_DOMAIN}/alert`, {
       credentials: "include",
@@ -154,7 +157,10 @@ export default class EntryContextProvider extends Component<{}, IEntryContext> {
           });
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        this.setState({ loading: false });
+      });
   };
 
   render() {

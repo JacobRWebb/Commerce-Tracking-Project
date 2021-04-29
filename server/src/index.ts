@@ -22,7 +22,7 @@ main()
     applyMiddleware(preMiddleware, app);
     app.use(routes);
 
-    // const generator = new Generator();
+    //const generator = new Generator();
     // await generator.base();
 
     app.listen(PORT, () => {

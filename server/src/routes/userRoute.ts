@@ -22,10 +22,7 @@ router.post("/login", Auth.nonLogged, async (req, res) => {
 
   return res
     .status(400)
-    .json({
-      error: true,
-      message: "unable to find account matching credentials.",
-    });
+    .json({ error: "Unable to find account matching credentials!" });
 });
 
 router.all("/logout", Auth.IsAuth, async (_req, res) => {
