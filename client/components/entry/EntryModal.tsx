@@ -146,7 +146,7 @@ const EntryModal: FunctionComponent = () => {
                 >
                   {AlertStatus.ACKNOWLEDGED}
                 </Button>
-                <Button
+                {/* <Button
                   colorScheme="blue"
                   variant={
                     tempState === undefined
@@ -160,7 +160,7 @@ const EntryModal: FunctionComponent = () => {
                   onClick={() => setTempState(AlertStatus.UNACKNOWLEDGED)}
                 >
                   {AlertStatus.UNACKNOWLEDGED}
-                </Button>
+                </Button> */}
                 <Button
                   colorScheme="red"
                   variant={
