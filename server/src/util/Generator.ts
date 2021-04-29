@@ -151,6 +151,6 @@ export default class Generator {
       .values(auxiliaryArray)
       .execute()
       .catch(() => {})
-      .finally(() => setImmediate(this.generateEntries, 1000));
+      .finally(() => setTimeout(this.generateEntries, 3000));
   };
 }

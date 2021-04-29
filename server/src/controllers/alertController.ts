@@ -1,5 +1,6 @@
 import { Brackets, getRepository } from "typeorm";
 import { Alert, AlertStatus, User, UserRole } from "../entities";
+import { IsProd } from "../util/constants";
 
 const USER_DAY_THRESHOLD = 2;
 
@@ -93,8 +94,12 @@ const alertController = {
       .skip(filter.offset)
       .orderBy("alert.timestamp", filter.time)
       .getManyAndCount();
-    console.log(`Queries: ${query[1]}`);
-    console.log(`Time taken ${Date.now() - start}/ms`);
+
+    if (!IsProd) {
+      console.log(`Queries: ${query[1]}`);
+      console.log(`Time taken ${Date.now() - start}/ms`);
+    }
+
     return query;
   },
   getOne: async (_user: User, id: string) => {
