@@ -1,17 +1,11 @@
-import { Router } from "express";
-import { bodyHandler, cookieParser, corsHandler, jsonHandler } from "./primary";
-
-type middleware = (router: Router) => void;
-
-export const applyMiddleware = (middleware: middleware[], router: Router) => {
-  middleware.forEach((middleware) => middleware(router));
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express, { Router } from "express";
+import helmet from "helmet";
+export const applyMiddleare = (app: Router) => {
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
+  app.use(helmet());
+  app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 };
-
-export const preMiddleware = [
-  corsHandler,
-  bodyHandler,
-  cookieParser,
-  jsonHandler,
-];
-
-export { default as Auth } from "./Auth";

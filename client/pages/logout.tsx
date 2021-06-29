@@ -1,25 +1,21 @@
-import { useRouter } from "next/router";
-import { FunctionComponent, useEffect } from "react";
-import { API_DOMAIN } from "../util/constants";
-import { useUser } from "../util/swrFunctions";
-
+import { serialize } from "cookie";
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import { FunctionComponent } from "react";
 const Logout: FunctionComponent = () => {
-  const { mutate } = useUser();
-  const router = useRouter();
+  return <div></div>;
+};
 
-  useEffect(() => {
-    fetch(`${API_DOMAIN}/user/logout`, {
-      credentials: "include",
-    })
-      .then(() => {
-        mutate(undefined);
-        router.push("/login");
-      })
-      .catch(() => {
-        //  Does not matter here!
-      });
-  });
-  return <></>;
+export const getServerSideProps = ({
+  req,
+  res,
+}: GetServerSidePropsContext): GetServerSidePropsResult<{}> => {
+  res.setHeader("Set-Cookie", serialize("token", "", { path: "/" }));
+  return {
+    redirect: {
+      destination: "/login",
+      permanent: false,
+    },
+  };
 };
 
 export default Logout;

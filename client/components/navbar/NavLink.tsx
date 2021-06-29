@@ -1,18 +1,32 @@
-import { Button } from "@chakra-ui/button";
 import { useRouter } from "next/router";
-import { FunctionComponent } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 
-const NavLink: FunctionComponent<{ to: string }> = ({ children, to }) => {
+export interface INavLink {
+  to: string;
+  tooltip?: string;
+}
+
+const NavLink: FunctionComponent<INavLink> = ({ to, tooltip, children }) => {
   const router = useRouter();
+  const [current, setCurrent] = useState(false);
 
-  const redirect = () => {
-    router.push(to);
-  };
+  useEffect(() => {
+    setCurrent(location.pathname === `${to}`);
+  }, []);
 
   return (
-    <Button zIndex={2} onClick={() => redirect()}>
+    <a
+      className="nav-icon"
+      onClick={() => {
+        if (!current) {
+          router.push(to);
+        }
+      }}
+      aria-checked={current}
+    >
       {children}
-    </Button>
+      {tooltip ? <p className="tooltip">{tooltip}</p> : <></>}
+    </a>
   );
 };
 

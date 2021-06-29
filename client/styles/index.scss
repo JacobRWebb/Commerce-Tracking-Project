@@ -1,0 +1,14 @@
+@import "navbar.scss";
+@import "auth.scss";
+@import "entry.scss";
+.layout {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+  gap: 1rem;
+  height: 100vh;
+  width: 100vw;
+  background-image: linear-gradient(to left top, #f7c2a3, #fd5070);
+  overflow-x: hidden;
+  padding: 1rem;
+}

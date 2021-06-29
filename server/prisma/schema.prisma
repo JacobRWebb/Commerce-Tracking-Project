@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  ACKNOWLEDGED
+  UNACKNOWLEDGED
+  DECLINED
+}
+
+model User {
+  id           String        @id @default(cuid())
+  username     String        @unique
+  password     String
+  role         Role          @default(USER)
+  applications Application[]
+  alerts       Alert[]
+  comments     Comment[]
+}
+
+model Application {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  users  User[]
+  alerts Alert[]
+}
+
+model Alert {
+  id            String      @id @default(cuid())
+  status        Status      @default(UNACKNOWLEDGED)
+  timestamp     DateTime    @default(now())
+  comment       Comment[]
+  hostname      String
+  file          String
+  changeAgent   String
+  changeProcess String
+  user          User?       @relation(fields: [userId], references: [id])
+  userId        String?
+  application   Application @relation(fields: [applicationId], references: [id])
+  applicationId String
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  comment   String
+  alert     Alert    @relation(fields: [alertId], references: [id])
+  alertId   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+}

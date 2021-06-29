@@ -1,43 +1,65 @@
-import { Box } from "@chakra-ui/layout";
-import { Stack } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import React, { FunctionComponent, useEffect } from "react";
-import Content from "../components/Content";
-import EntryModal from "../components/entry/EntryModal";
-import EntryTable from "../components/entry/EntryTable";
-import Filter from "../components/entry/Filter";
-import Pagination from "../components/entry/Pagination";
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import { FunctionComponent } from "react";
+import EntryList from "../components/entry/EntryContainer";
+import Layout from "../components/Layout";
 import Navbar from "../components/navbar/Navbar";
-import EntryContextProvider from "../context/EntryContext";
-import { useUser } from "../util/swrFunctions";
+import { API_DOMAIN } from "../util/constants";
 
-const Home: FunctionComponent = () => {
-  const router = useRouter();
-  const { data, loading } = useUser();
+export interface IHome {
+  user?: {
+    id: string;
+    username: string;
+    role: string;
+  };
+}
 
-  useEffect(() => {
-    if (!loading && data === undefined) {
-      router.push("/login");
-    }
-  }, [data, loading]);
-
-  if (loading || !data) return <></>;
-
+const Home: FunctionComponent<IHome> = ({ user }) => {
   return (
-    <Box height="100vh" width="100vw" overflowX="hidden">
+    <Layout>
       <Navbar />
-      <Content>
-        <EntryContextProvider>
-          <Stack direction="column" spacing="22px">
-            <Filter />
-            <Pagination />
-            <EntryTable />
-          </Stack>
-          <EntryModal />
-        </EntryContextProvider>
-      </Content>
-    </Box>
+      <EntryList />
+    </Layout>
   );
+};
+
+export const getServerSideProps = async ({
+  req,
+  res,
+}: GetServerSidePropsContext): Promise<GetServerSidePropsResult<IHome>> => {
+  const data = await fetch(`${API_DOMAIN}/user/check`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: req.cookies.token || "" }),
+  }).then((result) => {
+    if (result.status === 200 || result.status === 404) {
+      return result.json();
+    }
+  });
+
+  if (data) {
+    if (data.info) {
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    } else {
+      return {
+        props: {
+          user: data,
+        },
+      };
+    }
+  }
+
+  return {
+    redirect: {
+      destination: "/login",
+      permanent: false,
+    },
+  };
 };
 
 export default Home;

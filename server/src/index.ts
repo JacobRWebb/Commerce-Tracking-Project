@@ -1,39 +1,20 @@
 require("dotenv-safe/config");
 import express from "express";
-import { getConnection } from "typeorm";
-import { establishConnection } from "./entities";
-import { applyMiddleware, preMiddleware } from "./middleware";
+import http from "http";
+import { applyMiddleare } from "./middleware";
 import routes from "./routes";
-import { IsProd, NODE_ENV } from "./util/constants";
-import Generator from "./util/Generator";
+import SocketHandler from "./SocketHandler";
+
 const app = express();
+const server = http.createServer(app);
+
 const PORT: number = parseInt(process.env.PORT) || 5000;
 
-const main = async () => {
-  await establishConnection();
-  app.use("*", (_req, res, next) => {
-    if (!getConnection().isConnected)
-      return res.json({ success: false, api: true });
+applyMiddleare(app);
+SocketHandler(server);
 
-    return next();
-  });
-};
+app.use(routes);
 
-main()
-  .then(async () => {
-    applyMiddleware(preMiddleware, app);
-    app.use(routes);
-
-    //  Spin up mock data generator.
-    if (!IsProd) {
-      const generator = new Generator();
-      await generator.base();
-    }
-
-    app.listen(PORT, () => {
-      console.log(
-        `\nServer is running in ${NODE_ENV} mode.\n\nhttp://localhost:${PORT}/\n\n`
-      );
-    });
-  })
-  .catch(() => {});
+server.listen(PORT, async () => {
+  console.log("Server is now running");
+});

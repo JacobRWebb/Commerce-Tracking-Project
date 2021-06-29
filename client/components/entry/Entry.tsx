@@ -1,91 +1,67 @@
-import { Alert, AlertIcon } from "@chakra-ui/alert";
-import { Button } from "@chakra-ui/button";
-import { Stack, Text } from "@chakra-ui/layout";
-import theme from "@chakra-ui/theme";
-import moment from "moment";
-import { FunctionComponent, useContext } from "react";
-import { mutate } from "swr";
-import { EntryContext } from "../../context/EntryContext";
-import IEntry from "../../interface/IEntry";
-import { StatusTheme } from "../../util/statusTheme";
-import Container from "../Container";
+import React, {
+  createRef,
+  FunctionComponent,
+  useEffect,
+  useState,
+} from "react";
+import { BsChevronRight } from "react-icons/bs";
+import { IEntry } from "../../context/EntryContext";
+import { debounce } from "../../util/helper";
+import StatusIndiciator from "../StatusIndicator";
 
-const Entry: FunctionComponent<{ entry: IEntry; index: number }> = ({
-  entry,
-  index,
-}) => {
-  const context = useContext(EntryContext);
+const Entry: FunctionComponent<{ entry: IEntry }> = ({ entry }) => {
+  const glanceRef = createRef<HTMLDivElement>();
+  const detailRef = createRef<HTMLDivElement>();
 
-  if (!context)
-    return (
-      <>
-        <p>Context ERROR</p>
-      </>
-    );
+  const [open, setOpen] = useState(false);
+  const [height, setHeight] = useState<number>();
 
-  const statusTheme = StatusTheme(entry.status);
+  useEffect(() => {
+    reWork();
+
+    window.addEventListener("resize", debounce(reWork));
+    return () => {
+      window.removeEventListener("resize", debounce(reWork));
+    };
+  }, []);
+
+  useEffect(() => {
+    reWork();
+  }, [open]);
+
+  const reWork = () => {
+    if (glanceRef.current && detailRef.current) {
+      const glanceHeight = glanceRef.current.offsetHeight;
+      const detailHeight = detailRef.current.offsetHeight;
+      if (open) {
+        setHeight(glanceHeight + detailHeight);
+      } else {
+        setHeight(glanceHeight);
+      }
+    }
+  };
 
   return (
-    <Container
-      align="center"
-      backgroundColor={index % 2 === 0 ? "gray.300" : "gray.100"}
-      direction="row"
-      justify="space-between"
-      overflow="hidden"
-      borderColor="transparent"
-      borderLeftColor={statusTheme.borderColor}
-      padding={2}
-      _hover={{
-        borderRightColor: theme.colors.gray[500],
-      }}
+    <div
+      className="entry"
+      style={{ height: `calc(${height}px + ${open ? "1rem" : "0px"})` }}
     >
-      <Stack direction="column" width={[200, 200, 320]}>
-        <Alert
-          padding="unset"
-          backgroundColor="unset"
-          status={statusTheme.type}
-        >
-          <AlertIcon />
-          <Text>{entry.status}</Text>
-        </Alert>
-        <Text noOfLines={3} overflowWrap="break-word">
-          File Path: {entry.file}
-        </Text>
-      </Stack>
-      <Stack
-        display={["none", "unset"]}
-        direction="column"
-        width={[0, 130, 180, 200]}
-        overflow="hidden"
+      <div
+        className="entry-glance"
+        ref={glanceRef}
+        onClick={() => setOpen(!open)}
       >
-        <Text noOfLines={2}>Application ID: {entry.application.id}</Text>
-        <Text noOfLines={2}>Hostname: {entry.hostname}</Text>
-      </Stack>
-      <Stack
-        display={["none", "none", "none", "unset"]}
-        direction="column"
-        width={[0, 0, 0, 300]}
-        overflow="hidden"
-      >
-        <Text isTruncated={true}>
-          Submitted: {moment(entry.timestamp).fromNow()}
-        </Text>
-        {entry.user ? (
-          <Text isTruncated={true}>Last change by - {entry.user.username}</Text>
-        ) : (
-          <></>
-        )}
-      </Stack>
-      <Button
-        colorScheme="blue"
-        onClick={() => {
-          mutate("/user");
-          context.viewEntry(entry.id);
-        }}
-      >
-        Edit
-      </Button>
-    </Container>
+        <div className="primary1">
+          <StatusIndiciator status={entry.status} />
+          <p>{entry.file}</p>
+        </div>
+
+        <BsChevronRight className="entry-icon" aria-expanded={open} />
+      </div>
+      <div className="entry-detail" ref={detailRef}>
+        Detail
+      </div>
+    </div>
   );
 };
 

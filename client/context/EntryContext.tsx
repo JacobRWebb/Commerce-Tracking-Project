@@ -1,173 +1,59 @@
-import { debounce } from "lodash";
-import React, { Component } from "react";
-import IEntry, { AlertStatus } from "../interface/IEntry";
-import IFilter from "../interface/IFilter";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { API_DOMAIN } from "../util/constants";
 
-export interface IEntryContext {
-  currentEntry?: IEntry;
-  viewEntry: (id?: string) => void;
-  entries: IEntry[];
-  count: number;
-  loading: boolean;
-  fetchEntries: () => void;
-  filter: IFilter;
-  filterOpen: boolean;
-  setFilterOpen: (state?: boolean) => void;
-  updateFilter: (newFilter: Partial<IFilter>) => void;
-  updateEntry: (newEntry: Partial<IEntry>) => void;
+export enum IStatus {
+  ALL,
+  UNACKNOWLEDGED,
+  ACKNOWLEDGED,
+  DECLINED,
 }
 
-const defaultEntryContext: IEntryContext = {
-  currentEntry: undefined,
-  viewEntry: (id?: string) => {},
-  entries: [],
-  count: 0,
-  loading: true,
-  fetchEntries: () => {},
-  filter: {
-    time: "DESC",
-    status: AlertStatus.ALL,
-    extended: false,
-    offset: 0,
-    take: 25,
-    hostname: "",
-    applicationID: "",
-    page: 1,
-  },
-  filterOpen: false,
-  setFilterOpen: (state?: boolean) => {},
-  updateFilter: () => {},
-  updateEntry: () => {},
+export interface IEntry {
+  id: string;
+  status: IStatus;
+  timestamp: string;
+  hostname: string;
+  changeAgent: string;
+  changeProcess: string;
+  file: string;
+  userId: string;
+  applicationId: string;
+}
+
+export interface IEntryContext {
+  entries: IEntry[];
+}
+
+export const EntryContext = React.createContext<IEntryContext>({ entries: [] });
+
+const EntryContextProvider: FunctionComponent = ({ children }) => {
+  const [entries, setEntries] = useState<IEntry[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_DOMAIN}/entry`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((result) => {
+        if (result.status === 200 || result.status === 400) {
+          return result.json();
+        }
+      })
+      .then((data) => {
+        if (typeof data === "object") {
+          if (data.entries) {
+            setEntries(data.entries);
+          }
+        }
+      });
+  }, []);
+
+  return (
+    <EntryContext.Provider value={{ entries }}>
+      {children}
+    </EntryContext.Provider>
+  );
 };
 
-export const EntryContext = React.createContext<IEntryContext>(
-  defaultEntryContext
-);
-
-export default class EntryContextProvider extends Component<{}, IEntryContext> {
-  constructor(props: any) {
-    super(props);
-
-    this.state = {
-      ...defaultEntryContext,
-      viewEntry: this.viewEntry,
-      fetchEntries: this.fetchEntries,
-      setFilterOpen: this.setFilterOpen,
-      updateFilter: debounce(this.updateFilter, 50),
-      updateEntry: this.updateEntry,
-    };
-  }
-
-  setFilterOpen = (state?: boolean) => {
-    if (state) this.setState({ filterOpen: state });
-    else this.setState({ filterOpen: !this.state.filterOpen });
-  };
-
-  updateFilter = (newFilter: Partial<IFilter>) => {
-    if (!newFilter.page) {
-      newFilter.page = 1;
-    }
-    newFilter.offset = (newFilter.page - 1) * this.state.filter.take;
-
-    this.setState((prevState) => {
-      return {
-        filter: {
-          ...prevState.filter,
-          ...newFilter,
-        },
-      };
-    }, this.fetchEntries);
-  };
-
-  updateEntry = (newEntry: Partial<IEntry>) => {
-    fetch(`${API_DOMAIN}/alert/update`, {
-      credentials: "include",
-      method: "POST",
-      body: JSON.stringify(newEntry),
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((result) => {
-        if (result.status === 200) return result.json();
-      })
-      .then((data) => {
-        if (data !== undefined) {
-          this.fetchEntries();
-          this.viewEntry(newEntry.id);
-        }
-      })
-      .catch(() => {});
-  };
-
-  viewEntry = (id?: string) => {
-    if (id === undefined) {
-      this.setState({ currentEntry: undefined });
-      return;
-    }
-
-    fetch(`${API_DOMAIN}/alert/get`, {
-      credentials: "include",
-      method: "POST",
-      body: JSON.stringify({ id: id }),
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((result) => {
-        if (result.status === 200) return result.json();
-      })
-      .then((data) => {
-        if (data !== undefined) {
-          this.setState({ currentEntry: data.entry });
-        }
-      })
-      .catch(() => {});
-  };
-
-  fetchEntries = () => {
-    let filter: IFilter = this.state.filter;
-    filter.extended = window.location.pathname === "/admin" ? true : false;
-
-    if (!filter.page) {
-      filter.page = 1;
-    }
-
-    filter.offset = (filter.page - 1) * filter.take;
-
-    this.setState({ loading: true });
-
-    fetch(`${API_DOMAIN}/alert`, {
-      credentials: "include",
-      method: "POST",
-      body: JSON.stringify(filter),
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((result) => {
-        if (result.status === 200) return result.json();
-      })
-      .then((data) => {
-        if (data) {
-          this.setState((prevState) => {
-            return {
-              entries: data.alerts,
-              count: data.count,
-              filter: {
-                ...prevState.filter,
-                extended: filter.extended,
-              },
-            };
-          });
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        this.setState({ loading: false });
-      });
-  };
-
-  render() {
-    return (
-      <EntryContext.Provider value={this.state}>
-        {this.props.children}
-      </EntryContext.Provider>
-    );
-  }
-}
+export default EntryContextProvider;

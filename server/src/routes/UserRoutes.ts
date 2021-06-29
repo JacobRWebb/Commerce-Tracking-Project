@@ -1,0 +1,63 @@
+import { Request, Response, Router } from "express";
+import { body, validationResult } from "express-validator";
+import UserController from "../controllers/UserController";
+const router = Router();
+
+router.post("/logout", async (_req, res) => {
+  return res.status(200).cookie("token", "", { maxAge: 0 }).end();
+});
+
+router.post("/check", async (req, res) => {
+  const token = req.body.token || req.cookies.token || undefined;
+  console.log(token);
+  if (token) {
+    const user = await UserController.userFromToken(token);
+    console.log("Token Check");
+    if (user) {
+      return res
+        .status(200)
+        .json({ id: user.id, username: user.username, role: user.role })
+        .end();
+    }
+  }
+
+  return res.status(400).json({ info: "Bad Token" });
+});
+
+router.post(
+  "/login",
+  [
+    body("username").isLength({ min: 3, max: 30 }),
+    body("password").isLength({ min: 5 }),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json({ errors: errors.array({ onlyFirstError: true }) });
+    }
+
+    const { username = "", password = "" } = req.body as {
+      username: string;
+      password: string;
+    };
+    const user = await UserController.login(username, password);
+
+    if (user) {
+      const token = UserController.tokenizeUser(user);
+      return res
+        .status(200)
+        .cookie("token", token, {
+          httpOnly: true,
+        })
+        .json({ token });
+    }
+
+    return res
+      .status(400)
+      .json({ errors: [{ msg: "Invalid credentials", param: "SERVER" }] })
+      .end();
+  }
+);
+export default router;
