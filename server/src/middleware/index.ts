@@ -9,7 +9,7 @@ export const applyMiddleare = (app: Router) => {
   app.use(helmet());
   let domain =
     process.env.NODE_ENV === "production"
-      ? "https://xodius.io"
+      ? "https://www.xodius.io"
       : "localhost:3000";
   app.use(
     cors({
