@@ -5,7 +5,6 @@ module.exports = {
       cwd: "./client/",
       script: "yarn",
       args: "start",
-      interpreter: "/bin/bash",
     },
     {
       name: "ATAS - Backend",

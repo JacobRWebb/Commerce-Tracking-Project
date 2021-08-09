@@ -8,7 +8,7 @@ import { seedDB } from "./util/Generator";
 const app = express();
 const server = http.createServer(app);
 
-const PORT: number = parseInt(process.env.PORT) || 5000;
+const PORT: number = parseInt(process.env.API_PORT) || 5000;
 
 applyMiddleare(app);
 SocketHandler(server);
