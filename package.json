@@ -7,7 +7,7 @@
     "dev": "concurrently \"yarn --cwd client dev\" \"yarn --cwd server dev\"",
     "prod": "concurrently \"yarn --cwd client start\" \"yarn --cwd server prod\"",
     "setup": "yarn && yarn --cwd client && yarn --cwd server && yarn build",
-    "build": "yarn --cwd server build && yarn --cwd client build && echo Build Complete"
+    "build": "yarn --cwd server build"
   },
   "dependencies": {
     "global": "^4.4.0",
