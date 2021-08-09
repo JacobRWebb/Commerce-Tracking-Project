@@ -7,11 +7,14 @@ export const applyMiddleare = (app: Router) => {
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
   app.use(helmet());
-  // let domain = new RegExp("https://(www.|)xodius.io");
+  let domain =
+    process.env.NODE_ENV === "production"
+      ? "https://xodius.io"
+      : "localhost:3000";
   app.use(
     cors({
       credentials: true,
-      origin: "https:\\/\\/(www.|)xodius.io",
+      origin: domain,
     })
   );
 };

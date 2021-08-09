@@ -9,6 +9,7 @@ import socket from "../util/socket";
 
 const App: AppType = ({ Component, pageProps }) => {
   const router = useRouter();
+  console.log(process.env.NODE_ENV);
 
   useEffect(() => {
     socket.on("auth", ({ ...args }) => {
