@@ -5,6 +5,5 @@ ssh -tt root@xodius.io <<EOF
   git stash push --include-untracked
   git pull
   yarn setup
-  echo DONE
 EOF
 >>
