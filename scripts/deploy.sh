@@ -5,5 +5,6 @@ ssh -tt root@xodius.io <<-'ENDSSH'
   git stash push --include-untracked
   git pull
   yarn setup
+  pm2 start
   exit
 ENDSSH
