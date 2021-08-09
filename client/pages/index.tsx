@@ -1,65 +1,49 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import { actionCreators, RootState, wrapper } from "features";
 import { FunctionComponent } from "react";
-import EntryList from "../components/entry/EntryContainer";
+import EntryList from "../components/entry/ListContainer";
 import Layout from "../components/Layout";
 import Navbar from "../components/navbar/Navbar";
-import { API_DOMAIN } from "../util/constants";
 
-export interface IHome {
-  user?: {
-    id: string;
-    username: string;
-    role: string;
-  };
-}
-
-const Home: FunctionComponent<IHome> = ({ user }) => {
+const Home: FunctionComponent = () => {
   return (
-    <Layout>
-      <Navbar />
-      <EntryList />
-    </Layout>
+    <>
+      <Layout>
+        <Navbar />
+        <div className="content">
+          <EntryList />
+        </div>
+      </Layout>
+    </>
   );
 };
 
-export const getServerSideProps = async ({
-  req,
-  res,
-}: GetServerSidePropsContext): Promise<GetServerSidePropsResult<IHome>> => {
-  const data = await fetch(`${API_DOMAIN}/user/check`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: req.cookies.token || "" }),
-  }).then((result) => {
-    if (result.status === 200 || result.status === 404) {
-      return result.json();
-    }
-  });
+export const getServerSideProps = wrapper.getServerSideProps(
+  (store) =>
+    async ({ req }) => {
+      let token = req.cookies.token;
+      await store.dispatch(actionCreators.AuthActions.checkToken({ token }));
+      let state: RootState = store.getState();
 
-  if (data) {
-    if (data.info) {
+      if (state.auth.user === null) {
+        return {
+          redirect: {
+            permanent: false,
+            destination: "/login",
+          },
+        };
+      }
+      state = store.getState();
+      await store.dispatch(
+        actionCreators.EntriesActions.fetchEntries(
+          state.filter,
+          state.auth.user.token
+        )
+      );
+
       return {
-        redirect: {
-          destination: "/login",
-          permanent: false,
-        },
-      };
-    } else {
-      return {
-        props: {
-          user: data,
-        },
+        props: {},
       };
     }
-  }
-
-  return {
-    redirect: {
-      destination: "/login",
-      permanent: false,
-    },
-  };
-};
+);
 
 export default Home;

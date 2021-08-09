@@ -5,3 +5,8 @@ export const debounce = (func: () => void) => {
     timer = setTimeout(func, 100, event);
   };
 };
+
+export const caseFix = (value: string): string => {
+  let aux = value.toLowerCase();
+  return value.charAt(0).toUpperCase() + aux.slice(1);
+};

@@ -1,6 +1,6 @@
 import { PrismaClient, User } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { hashString } from "../util/Basic";
+import { hashString, userFromToken } from "../util/Basic";
 const prisma = new PrismaClient();
 
 const UserController = {
@@ -28,6 +28,10 @@ const UserController = {
       where: { username, password: hash },
     });
 
+    return user;
+  },
+  checkToken: async (token: string) => {
+    const user = userFromToken(token);
     return user;
   },
 };

@@ -1,6 +1,7 @@
 import { serialize } from "cookie";
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { FunctionComponent } from "react";
+
 const Logout: FunctionComponent = () => {
   return <div></div>;
 };

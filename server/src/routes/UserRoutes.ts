@@ -24,6 +24,30 @@ router.post("/check", async (req, res) => {
   return res.status(400).json({ info: "Bad Token" });
 });
 
+router.post("/token", [body("token")], async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors });
+  }
+
+  const token = req.body.token;
+
+  const user = await UserController.checkToken(token);
+  if (user) {
+    return res
+      .status(200)
+      .cookie("token", token, {
+        httpOnly: true,
+      })
+      .json({ token, user: { username: user.username, role: user.role } });
+  }
+
+  return res
+    .status(400)
+    .json({ errors: [{ msg: "Token Mismatch", param: "Server" }] })
+    .end();
+});
+
 router.post(
   "/login",
   [
@@ -51,12 +75,12 @@ router.post(
         .cookie("token", token, {
           httpOnly: true,
         })
-        .json({ token });
+        .json({ token, user: { username: user.username, role: user.role } });
     }
 
     return res
       .status(400)
-      .json({ errors: [{ msg: "Invalid credentials", param: "SERVER" }] })
+      .json({ errors: [{ msg: "Invalid credentials", param: "Server" }] })
       .end();
   }
 );

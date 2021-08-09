@@ -1,28 +1,30 @@
-import { FunctionComponent } from "react";
-import {
-  AiOutlineHome,
-  AiOutlineLock,
-  AiOutlineUserDelete,
-} from "react-icons/ai";
-import NavLink from "./NavLink";
+import { FunctionComponent, useState } from "react";
+import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
+import NavButton from "./NavButton";
+import NavMenu from "./NavMenu";
 
 const Navbar: FunctionComponent = () => {
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="navbar">
-      <div className="nav-menu">
-        <h1>ATAS</h1>
+      <div className="headerContainer" aria-expanded={open}>
+        <h1 className="companyTitle">ATAS</h1>
+
+        {open ? (
+          <AiOutlineClose
+            onClick={() => setOpen(false)}
+            className="navOpenBtn"
+          />
+        ) : (
+          <AiOutlineMenu onClick={() => setOpen(true)} className="navOpenBtn" />
+        )}
       </div>
-      <div className="nav-menu">
-        <NavLink to="/" tooltip="Home">
-          <AiOutlineHome />
-        </NavLink>
-        <NavLink to="/admin" tooltip="Admin View">
-          <AiOutlineLock />
-        </NavLink>
-        <NavLink to="/logout" tooltip="Logout">
-          <AiOutlineUserDelete />
-        </NavLink>
-      </div>
+      <NavMenu open={open}>
+        <NavButton to="/" value="Homepage" />
+        <NavButton to="/admin" value="Admin" />
+        <NavButton to="/logout" value="Logout" />
+      </NavMenu>
     </div>
   );
 };

@@ -1,14 +1,91 @@
-@import "navbar.scss";
-@import "auth.scss";
-@import "entry.scss";
+@import "./variables.scss";
+@import "./navbar.scss";
+@import "./entry.scss";
+@import "./comment.scss";
+
+.transition {
+  transition-property: background-color, border-color, color, fill, stroke,
+    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition: all 1s;
+}
+
 .layout {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: repeat(12, 1fr);
-  gap: 1rem;
-  height: 100vh;
-  width: 100vw;
-  background-image: linear-gradient(to left top, #f7c2a3, #fd5070);
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px;
   overflow-x: hidden;
-  padding: 1rem;
+  overflow-y: auto;
+}
+
+.content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: unset;
+}
+
+.hidden {
+  display: none;
+}
+
+.flex {
+  display: flex;
+}
+
+.scroll {
+  &::-webkit-scrollbar {
+    width: 15px;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 0px 5px 5px 0px;
+    background: #edf2f7;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 100vh;
+    border: 3px solid #edf2f7;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+  }
+}
+
+.filterShade {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0px;
+  left: 0px;
+  background-color: rgba(black, 0.4);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.filterModal {
+  transition: all 3s;
+  transform: translateX(-100vw);
+  background-color: white;
+
+  &[aria-expanded="true"] {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 640px) {
+  .content {
+    padding: 0px 10%;
+  }
+}
+
+@media (min-width: 768px) {
+}
+
+@media (min-width: 1024px) {
 }

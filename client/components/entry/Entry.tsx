@@ -1,66 +1,56 @@
-import React, {
-  createRef,
-  FunctionComponent,
-  useEffect,
-  useState,
-} from "react";
-import { BsChevronRight } from "react-icons/bs";
-import { IEntry } from "../../context/EntryContext";
-import { debounce } from "../../util/helper";
-import StatusIndiciator from "../StatusIndicator";
+import { actionCreators, RootState } from "features";
+import React, { FunctionComponent, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { bindActionCreators } from "redux";
+import {
+  EEntryMethods,
+  IEntry,
+  ISocketEntryRecieving,
+  ISocketEntrySending,
+} from "../../interfaces/IEntryInterfaces";
+import socket from "../../util/socket";
+import Detail from "./Detail";
+import Glance from "./Glance";
 
 const Entry: FunctionComponent<{ entry: IEntry }> = ({ entry }) => {
-  const glanceRef = createRef<HTMLDivElement>();
-  const detailRef = createRef<HTMLDivElement>();
+  const dispatch = useDispatch();
 
-  const [open, setOpen] = useState(false);
-  const [height, setHeight] = useState<number>();
+  const state = useSelector((state: RootState) => state);
+  const { setComments } = bindActionCreators(
+    actionCreators.EntriesActions,
+    dispatch
+  );
 
   useEffect(() => {
-    reWork();
+    if (entry.meta.open) {
+      socket.on(entry.id, socketHandle);
+      const outgoing_data: ISocketEntrySending = {
+        METHOD: EEntryMethods.REQUEST,
+        data: {
+          entryId: entry.id,
+          userToken: state.auth.user.token,
+        },
+      };
+      socket.emit("entry", outgoing_data);
+    }
 
-    window.addEventListener("resize", debounce(reWork));
     return () => {
-      window.removeEventListener("resize", debounce(reWork));
+      socket.off(entry.id, socketHandle);
     };
-  }, []);
+  }, [entry.meta.open]);
 
-  useEffect(() => {
-    reWork();
-  }, [open]);
-
-  const reWork = () => {
-    if (glanceRef.current && detailRef.current) {
-      const glanceHeight = glanceRef.current.offsetHeight;
-      const detailHeight = detailRef.current.offsetHeight;
-      if (open) {
-        setHeight(glanceHeight + detailHeight);
-      } else {
-        setHeight(glanceHeight);
-      }
+  const socketHandle = (args: ISocketEntryRecieving) => {
+    switch (args.METHOD) {
+      case EEntryMethods.COMMENT_RESPONSE:
+        setComments(entry.id, args.data.comments);
+        break;
     }
   };
 
   return (
-    <div
-      className="entry"
-      style={{ height: `calc(${height}px + ${open ? "1rem" : "0px"})` }}
-    >
-      <div
-        className="entry-glance"
-        ref={glanceRef}
-        onClick={() => setOpen(!open)}
-      >
-        <div className="primary1">
-          <StatusIndiciator status={entry.status} />
-          <p>{entry.file}</p>
-        </div>
-
-        <BsChevronRight className="entry-icon" aria-expanded={open} />
-      </div>
-      <div className="entry-detail" ref={detailRef}>
-        Detail
-      </div>
+    <div className="entry">
+      <Glance entry={entry} />
+      <Detail entry={entry} />
     </div>
   );
 };

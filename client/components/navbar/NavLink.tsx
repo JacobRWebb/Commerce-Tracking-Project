@@ -16,7 +16,7 @@ const NavLink: FunctionComponent<INavLink> = ({ to, tooltip, children }) => {
 
   return (
     <a
-      className="nav-icon"
+      className="flex flex-col align-middle justify-center h-full w-7"
       onClick={() => {
         if (!current) {
           router.push(to);
@@ -25,7 +25,7 @@ const NavLink: FunctionComponent<INavLink> = ({ to, tooltip, children }) => {
       aria-checked={current}
     >
       {children}
-      {tooltip ? <p className="tooltip">{tooltip}</p> : <></>}
+      {tooltip ? <p className="hidden group-hover:flex">{tooltip}</p> : <></>}
     </a>
   );
 };

@@ -4,6 +4,7 @@ import http from "http";
 import { applyMiddleare } from "./middleware";
 import routes from "./routes";
 import SocketHandler from "./SocketHandler";
+import { seedDB } from "./util/Generator";
 
 const app = express();
 const server = http.createServer(app);
@@ -17,4 +18,5 @@ app.use(routes);
 
 server.listen(PORT, async () => {
   console.log("Server is now running");
+  seedDB();
 });

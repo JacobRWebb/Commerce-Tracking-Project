@@ -1,113 +1,88 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import { actionCreators, RootState, wrapper } from "features";
 import { useRouter } from "next/router";
-import React, { FunctionComponent, useState } from "react";
-import { BsArrowRight } from "react-icons/bs";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { AiOutlineLock, AiOutlineUser } from "react-icons/ai";
+import { useDispatch, useSelector } from "react-redux";
+import { bindActionCreators } from "redux";
+import Form from "../components/form/Form";
+import FormButton from "../components/form/FormButton";
+import FormHeader from "../components/form/FormHeader";
+import FormSubHeader from "../components/form/FormSubHeader";
+import InputField from "../components/form/InputField";
 import Layout from "../components/Layout";
-import { API_DOMAIN } from "../util/constants";
 
 const Login: FunctionComponent = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { login } = bindActionCreators(actionCreators.AuthActions, dispatch);
+  const auth = useSelector((state: RootState) => state.auth);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [fetching, setFetching] = useState(false);
 
-  const login = (event: React.FormEvent) => {
+  useEffect(() => {
+    if (auth.user) {
+      router.push("/");
+    }
+  }, [auth.user]);
+
+  const submitLogin = (event: React.FormEvent) => {
     event.preventDefault();
-    setFetching(true);
-    fetch(`${API_DOMAIN}/user/login`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    })
-      .then((result) => {
-        if (result.status === 200 || result.status === 404) {
-          return result.json();
-        }
-      })
-      .then((data) => {
-        console.log(data);
-        if (data) {
-          if (data.token) {
-            router.push("/");
-          }
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => {
-        setFetching(false);
-      });
+    login({ username, password });
   };
 
   return (
     <Layout>
-      <div className="auth">
-        <form className="auth-form" onSubmit={login}>
-          <h1>Login</h1>
-          <div>
-            <p>Don't have an account?</p>
-            <a>Sign up</a>
-          </div>
-          <input
-            className="auth-input"
-            placeholder="Username"
-            autoComplete="username"
-            type="text"
-            value={username}
-            onChange={({ currentTarget }) => setUsername(currentTarget.value)}
-            disabled={fetching}
-          />
-          <input
-            className="auth-input"
-            placeholder="Password"
-            autoComplete="password"
-            type="password"
-            value={password}
-            onChange={({ currentTarget }) => setPassword(currentTarget.value)}
-            disabled={fetching}
-          />
-          <button className="auth-submit" type="submit" disabled={fetching}>
-            Login
-            <BsArrowRight />
-          </button>
-        </form>
-      </div>
+      <Form formFunc={submitLogin} error={auth.error ? true : false}>
+        <FormHeader value="Login" />
+        <FormSubHeader value="Access Content and Manage Alerts." />
+        <InputField
+          icon={<AiOutlineUser />}
+          placeholder="Username"
+          autoComplete="username"
+          value={username}
+          onChange={({ currentTarget }) => setUsername(currentTarget.value)}
+          disabled={auth.fetching}
+        />
+        <InputField
+          icon={<AiOutlineLock />}
+          placeholder="Password"
+          autoComplete="password"
+          type="password"
+          value={password}
+          onChange={({ currentTarget }) => setPassword(currentTarget.value)}
+          disabled={auth.fetching}
+        />
+        {auth.error ? (
+          <p key="error">{`${auth.error.param}: ${auth.error.msg}`}</p>
+        ) : (
+          <p></p>
+        )}
+        <FormButton disabled={auth.fetching}>Login</FormButton>
+      </Form>
     </Layout>
   );
 };
 
-export const getServerSideProps = async ({
-  req,
-  res,
-}: GetServerSidePropsContext): Promise<GetServerSidePropsResult<{}>> => {
-  const data = await fetch(`${API_DOMAIN}/user/check`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: req.cookies.token || "" }),
-  }).then((result) => {
-    if (result.status === 200 || result.status === 404) {
-      return result.json();
-    }
-  });
+export const getServerSideProps = wrapper.getServerSideProps(
+  (store) =>
+    async ({ req }) => {
+      let token = req.cookies.token;
+      await store.dispatch(actionCreators.AuthActions.checkToken({ token }));
+      let state: RootState = store.getState();
+      if (state.auth.user === null) {
+        return {
+          props: {},
+        };
+      }
 
-  if (data) {
-    if (!data.info) {
       return {
         redirect: {
-          destination: "/",
           permanent: false,
+          destination: "/",
         },
       };
     }
-  }
-
-  return {
-    props: {},
-  };
-};
+);
 
 export default Login;

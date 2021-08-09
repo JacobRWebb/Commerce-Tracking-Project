@@ -16,9 +16,10 @@ enum Role {
 }
 
 enum Status {
-  ACKNOWLEDGED
-  UNACKNOWLEDGED
-  DECLINED
+  All
+  Acknowledged
+  Unacknowledged
+  Declined
 }
 
 model User {
@@ -40,7 +41,7 @@ model Application {
 
 model Alert {
   id            String      @id @default(cuid())
-  status        Status      @default(UNACKNOWLEDGED)
+  status        Status      @default(Unacknowledged)
   timestamp     DateTime    @default(now())
   comment       Comment[]
   hostname      String
