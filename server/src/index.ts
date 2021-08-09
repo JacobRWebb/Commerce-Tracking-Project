@@ -1,4 +1,3 @@
-require("dotenv-safe/config");
 import express from "express";
 import http from "http";
 import { applyMiddleare } from "./middleware";
