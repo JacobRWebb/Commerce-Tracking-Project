@@ -10,11 +10,12 @@ export const applyMiddleare = (app: Router) => {
   app.use(
     cors({
       credentials: true,
-      origin: [
-        "http://localhost:3000",
-        "https://www.xodius.io",
-        "https://xodius.io",
-      ],
+      origin: "*",
+      // origin: [
+      //   "http://localhost:3000",
+      //   "https://www.xodius.io",
+      //   "https://xodius.io",
+      // ],
     })
   );
 };
