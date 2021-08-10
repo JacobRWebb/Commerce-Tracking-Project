@@ -23,6 +23,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
       let token = req.cookies.token;
       await store.dispatch(actionCreators.AuthActions.checkToken({ token }));
       let state: RootState = store.getState();
+      console.log("Index page");
+      console.log(state);
 
       if (state.auth.user === null) {
         return {

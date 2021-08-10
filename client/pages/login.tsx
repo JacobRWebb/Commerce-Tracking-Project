@@ -22,6 +22,7 @@ const Login: FunctionComponent = () => {
 
   useEffect(() => {
     if (auth.user) {
+      console.log("Login Found Auth");
       router.push("/");
     }
   }, [auth.user]);
@@ -70,6 +71,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
       let token = req.cookies.token;
       await store.dispatch(actionCreators.AuthActions.checkToken({ token }));
       let state: RootState = store.getState();
+      console.log("Login State");
+      console.log(state);
+
       if (state.auth.user === null) {
         return {
           props: {},
