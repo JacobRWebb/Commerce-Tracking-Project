@@ -1,8 +1,8 @@
 import { createWrapper, HYDRATE } from "next-redux-wrapper";
-import { AnyAction, applyMiddleware, createStore } from "redux";
+import { applyMiddleware, createStore } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
-import thunk, { ThunkDispatch } from "redux-thunk";
-import rootReducer, { RootState } from "./RootReducer";
+import thunk from "redux-thunk";
+import rootReducer from "./RootReducer";
 
 const composeEnhancers = composeWithDevTools({
   trace: true,
@@ -11,12 +11,20 @@ const composeEnhancers = composeWithDevTools({
 
 const reducer = (state, action) => {
   if (action.type === HYDRATE) {
+    console.log("Store Reducer Hydrate");
+    console.log(state);
+    console.log(action);
+
     const nextState = {
       ...state,
       ...action.payload,
     };
     return nextState;
   } else {
+    console.log("Store Reducer Else");
+    console.log(state);
+    console.log(action);
+
     return rootReducer(state, action);
   }
 };
@@ -26,4 +34,4 @@ const initStore = () => {
 };
 
 export const wrapper = createWrapper(initStore);
-export type AppThunkDispatch = ThunkDispatch<RootState, void, AnyAction>;
+// export type AppThunkDispatch = ThunkDispatch<RootState, void, AnyAction>;
