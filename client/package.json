@@ -12,6 +12,7 @@
     "@types/react-transition-group": "^4.4.1",
     "@types/redux": "^3.6.0",
     "cookie": "^0.4.1",
+    "jsondiffpatch": "^0.4.1",
     "moment": "^2.29.1",
     "next": "^11.0.0",
     "next-redux-wrapper": "^7.0.2",

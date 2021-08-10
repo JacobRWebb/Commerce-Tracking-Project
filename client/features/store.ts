@@ -1,37 +1,53 @@
+import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import { createWrapper, HYDRATE } from "next-redux-wrapper";
-import { applyMiddleware, createStore } from "redux";
-import { composeWithDevTools } from "redux-devtools-extension";
-import thunk from "redux-thunk";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { combineReducers } from "redux";
+import { isProd } from "util/constants";
+import authReducer from "./auth/authReducer";
+import entriesReducer from "./entries/entriesReducer";
+import filterReducer from "./filter/filterReducer";
 import rootReducer from "./RootReducer";
 
-const composeEnhancers = composeWithDevTools({
-  trace: true,
-  traceLimit: 25,
-});
-
-const reducer = (state, action) => {
+const reducer = (state: RootState, action): RootState => {
   if (action.type === HYDRATE) {
-    console.log("Store Reducer Hydrate");
-    console.log(state);
-    console.log(action);
-
-    const nextState = {
+    const nextState: RootState = {
       ...state,
       ...action.payload,
     };
     return nextState;
   } else {
-    console.log("Store Reducer Else");
-    console.log(state);
-    console.log(action);
-
     return rootReducer(state, action);
   }
 };
 
 const initStore = () => {
-  return createStore(reducer, composeEnhancers(applyMiddleware(thunk)));
+  return configureStore({
+    reducer: reducer,
+    devTools: !isProd,
+  });
 };
+export type AppStore = ReturnType<typeof initStore>;
 
-export const wrapper = createWrapper(initStore);
-// export type AppThunkDispatch = ThunkDispatch<RootState, void, AnyAction>;
+export const wrapper = createWrapper<AppStore>(initStore);
+
+const combined = combineReducers({
+  auth: authReducer,
+  filter: filterReducer,
+  entries: entriesReducer,
+});
+
+export const store = configureStore({
+  reducer: combined,
+  devTools: !isProd,
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  RootState,
+  unknown,
+  Action<string>
+>;
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

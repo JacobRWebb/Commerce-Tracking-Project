@@ -1,4 +1,5 @@
-import { actionCreators, RootState, wrapper } from "features";
+import { actionCreators } from "features";
+import { RootState, wrapper } from "features/store";
 import { FunctionComponent } from "react";
 import EntryList from "../components/entry/ListContainer";
 import Layout from "../components/Layout";
@@ -23,8 +24,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
       let token = req.cookies.token;
       await store.dispatch(actionCreators.AuthActions.checkToken({ token }));
       let state: RootState = store.getState();
-      console.log("Index page");
-      console.log(state);
 
       if (state.auth.user === null) {
         return {

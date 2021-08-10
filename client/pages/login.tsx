@@ -1,4 +1,4 @@
-import { actionCreators, RootState, wrapper } from "features";
+import { actionCreators, RootState } from "features";
 import { useRouter } from "next/router";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { AiOutlineLock, AiOutlineUser } from "react-icons/ai";
@@ -65,28 +65,28 @@ const Login: FunctionComponent = () => {
   );
 };
 
-export const getServerSideProps = wrapper.getServerSideProps(
-  (store) =>
-    async ({ req }) => {
-      let token = req.cookies.token;
-      await store.dispatch(actionCreators.AuthActions.checkToken({ token }));
-      let state: RootState = store.getState();
-      console.log("Login State");
-      console.log(state);
+// export const getServerSideProps = wrapper.getServerSideProps(
+//   (store) =>
+//     async ({ req }) => {
+//       let token = req.cookies.token;
+//       await store.dispatch(actionCreators.AuthActions.checkToken({ token }));
+//       let state: RootState = store.getState();
+//       console.log("Login State");
+//       console.log(state);
 
-      if (state.auth.user === null) {
-        return {
-          props: {},
-        };
-      }
+//       if (state.auth.user === null) {
+//         return {
+//           props: {},
+//         };
+//       }
 
-      return {
-        redirect: {
-          permanent: false,
-          destination: "/",
-        },
-      };
-    }
-);
+//       return {
+//         redirect: {
+//           permanent: false,
+//           destination: "/",
+//         },
+//       };
+//     }
+// );
 
 export default Login;
