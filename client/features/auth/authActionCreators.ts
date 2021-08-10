@@ -24,6 +24,9 @@ export const login = (data: IAuthLoginInput) => {
 
     if (response.status === 200 || response.status === 400) {
       const data = await response.json();
+      console.log("Login Response");
+      console.log(data);
+
       if (data.user && data.token) {
         dispatch({
           type: EAuthActions.LOGIN,
