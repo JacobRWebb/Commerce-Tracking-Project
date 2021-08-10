@@ -10,7 +10,7 @@ export const applyMiddleare = (app: Router) => {
   let domain =
     process.env.NODE_ENV === "production"
       ? "https://www.xodius.io"
-      : "localhost:3000";
+      : "http://localhost:3000";
   app.use(
     cors({
       credentials: true,
