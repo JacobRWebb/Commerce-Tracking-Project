@@ -20,10 +20,10 @@ const reducer = (state: RootState, action): RootState => {
   }
 };
 
-const initStore = () => {
+const initStore = ({ ...test }) => {
   return configureStore({
     reducer: reducer,
-    devTools: !isProd,
+    devTools: true,
   });
 };
 export type AppStore = ReturnType<typeof initStore>;
