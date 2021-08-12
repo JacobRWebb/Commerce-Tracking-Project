@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import { body, validationResult } from "express-validator";
 import UserController from "../controllers/UserController";
+import { IsProd } from "../util/constants";
 const router = Router();
 
 router.post("/logout", async (_req, res) => {
@@ -37,8 +38,8 @@ router.post("/token", [body("token")], async (req: Request, res: Response) => {
       .cookie("token", token, {
         httpOnly: true,
         maxAge: 12 * 24 * 60 * 10,
-        secure: true,
-        domain: "xodius.io",
+        secure: IsProd,
+        domain: IsProd ? "xodius.io" : "localhost",
       })
       .json({ token, user: { username: user.username, role: user.role } });
   }
@@ -76,8 +77,8 @@ router.post(
         .cookie("token", token, {
           httpOnly: true,
           maxAge: 12 * 24 * 60 * 10,
-          secure: true,
-          domain: "xodius.io",
+          secure: IsProd,
+          domain: IsProd ? "xodius.io" : "localhost",
         })
         .json({ token, user: { username: user.username, role: user.role } });
     }

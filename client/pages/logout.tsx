@@ -1,6 +1,7 @@
 import { serialize } from "cookie";
 import { actionCreators, wrapper } from "features";
 import { FunctionComponent } from "react";
+import { isProd } from "util/constants";
 
 const Logout: FunctionComponent = () => {
   return <div></div>;
@@ -14,8 +15,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
         serialize("token", "", {
           path: "/",
           maxAge: 0,
-          domain: "xodius.io",
-          secure: true,
+          domain: isProd ? "xodius.io" : "localhost",
+          secure: isProd,
         })
       );
 

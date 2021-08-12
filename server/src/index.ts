@@ -17,9 +17,7 @@ app.use(routes);
 
 server.listen(PORT, async () => {
   console.log("Server is now running");
-  if (process.env.NODE_ENV) {
-    if (process.env.NODE_ENV !== "production") {
-      seedDB();
-    }
-  }
+
+  //  Seed both prod and dev
+  seedDB();
 });

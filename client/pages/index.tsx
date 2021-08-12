@@ -34,13 +34,14 @@ export const getServerSideProps = wrapper.getServerSideProps(
           },
         };
       }
-      state = store.getState();
+
       await store.dispatch(
         actionCreators.EntriesActions.fetchEntries(
           state.filter,
           state.auth.user.token
         )
       );
+      state = store.getState();
 
       return {
         props: {},

@@ -22,7 +22,6 @@ const Login: FunctionComponent = () => {
 
   useEffect(() => {
     if (auth.user) {
-      console.log("Login Found Auth");
       router.push("/");
     }
   }, [auth.user]);
