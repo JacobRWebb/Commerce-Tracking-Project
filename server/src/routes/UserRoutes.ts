@@ -32,16 +32,13 @@ router.post("/token", [body("token")], async (req: Request, res: Response) => {
 
   const user = await UserController.checkToken(token);
   if (user) {
-    console.log("Serverside-user-token");
-    console.log(token);
-
     return res
       .status(200)
       .cookie("token", token, {
         httpOnly: true,
         maxAge: 12 * 24 * 60 * 10,
         secure: true,
-        domain: "xodius.io",
+        domain: "www.xodius.io",
       })
       .json({ token, user: { username: user.username, role: user.role } });
   }
@@ -74,15 +71,13 @@ router.post(
 
     if (user) {
       const token = UserController.tokenizeUser(user);
-      console.log("Serverside-tokenize-token");
-      console.log(token);
       return res
         .status(200)
         .cookie("token", token, {
           httpOnly: true,
           maxAge: 12 * 24 * 60 * 10,
           secure: true,
-          domain: "xodius.io",
+          domain: "www.xodius.io",
         })
         .json({ token, user: { username: user.username, role: user.role } });
     }
