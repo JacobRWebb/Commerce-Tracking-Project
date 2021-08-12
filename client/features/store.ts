@@ -14,9 +14,6 @@ const reducer = (state: RootState, action): RootState => {
       ...state,
       ...action.payload,
     };
-
-    // if (state.auth.user) nextState.auth.user = state.auth.user;
-
     return nextState;
   } else {
     return rootReducer(state, action);
@@ -26,7 +23,7 @@ const reducer = (state: RootState, action): RootState => {
 const initStore = ({ ...test }) => {
   return configureStore({
     reducer: reducer,
-    devTools: true,
+    devTools: isProd,
   });
 };
 export type AppStore = ReturnType<typeof initStore>;
@@ -41,7 +38,7 @@ const combined = combineReducers({
 
 export const store = configureStore({
   reducer: combined,
-  devTools: !isProd,
+  devTools: isProd,
 });
 
 export type RootState = ReturnType<typeof store.getState>;
