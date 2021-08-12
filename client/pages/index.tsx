@@ -22,11 +22,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
   (store) =>
     async ({ req }) => {
       let token = req.cookies.token;
-      console.log(token);
 
       await store.dispatch(actionCreators.AuthActions.checkToken({ token }));
       let state: RootState = store.getState();
-      console.log(state);
 
       if (state.auth.user === null) {
         return {

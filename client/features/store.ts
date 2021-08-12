@@ -9,18 +9,13 @@ import filterReducer from "./filter/filterReducer";
 import rootReducer from "./RootReducer";
 
 const reducer = (state: RootState, action): RootState => {
-  console.log(action.type);
-
   if (action.type === HYDRATE) {
-    console.log(state);
-    console.log(action.payload);
-
     const nextState: RootState = {
       ...state,
       ...action.payload,
     };
 
-    if (state.auth.user) nextState.auth.user = state.auth.user;
+    // if (state.auth.user) nextState.auth.user = state.auth.user;
 
     return nextState;
   } else {

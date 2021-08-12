@@ -8,23 +8,16 @@ router.post("/logout", async (_req, res) => {
 });
 
 router.post("/check", async (req, res) => {
-  console.log("User Check");
-
   const token = req.body.token || req.cookies.token || undefined;
-  console.log(token);
   if (token) {
     const user = await UserController.userFromToken(token);
-    console.log("Token Check");
     if (user) {
-      console.log("user Found");
-
       return res
         .status(200)
         .json({ id: user.id, username: user.username, role: user.role })
         .end();
     }
   }
-  console.log("Bad Token");
 
   return res.status(400).json({ info: "Bad Token" });
 });
@@ -39,10 +32,15 @@ router.post("/token", [body("token")], async (req: Request, res: Response) => {
 
   const user = await UserController.checkToken(token);
   if (user) {
+    console.log("Serverside-user-token");
+    console.log(token);
+
     return res
       .status(200)
       .cookie("token", token, {
         httpOnly: true,
+        maxAge: 12 * 24 * 60 * 10,
+        secure: true,
       })
       .json({ token, user: { username: user.username, role: user.role } });
   }
@@ -75,11 +73,14 @@ router.post(
 
     if (user) {
       const token = UserController.tokenizeUser(user);
+      console.log("Serverside-tokenize-token");
+      console.log(token);
       return res
         .status(200)
         .cookie("token", token, {
           httpOnly: true,
           maxAge: 12 * 24 * 60 * 10,
+          secure: true,
         })
         .json({ token, user: { username: user.username, role: user.role } });
     }
