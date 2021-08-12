@@ -41,6 +41,7 @@ router.post("/token", [body("token")], async (req: Request, res: Response) => {
         httpOnly: true,
         maxAge: 12 * 24 * 60 * 10,
         secure: true,
+        domain: "xodius.io",
       })
       .json({ token, user: { username: user.username, role: user.role } });
   }
@@ -81,6 +82,7 @@ router.post(
           httpOnly: true,
           maxAge: 12 * 24 * 60 * 10,
           secure: true,
+          domain: "xodius.io",
         })
         .json({ token, user: { username: user.username, role: user.role } });
     }
