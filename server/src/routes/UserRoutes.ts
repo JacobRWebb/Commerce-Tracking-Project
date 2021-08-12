@@ -8,18 +8,23 @@ router.post("/logout", async (_req, res) => {
 });
 
 router.post("/check", async (req, res) => {
+  console.log("User Check");
+
   const token = req.body.token || req.cookies.token || undefined;
   console.log(token);
   if (token) {
     const user = await UserController.userFromToken(token);
     console.log("Token Check");
     if (user) {
+      console.log("user Found");
+
       return res
         .status(200)
         .json({ id: user.id, username: user.username, role: user.role })
         .end();
     }
   }
+  console.log("Bad Token");
 
   return res.status(400).json({ info: "Bad Token" });
 });
