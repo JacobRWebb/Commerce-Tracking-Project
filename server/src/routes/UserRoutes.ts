@@ -79,6 +79,7 @@ router.post(
         .status(200)
         .cookie("token", token, {
           httpOnly: true,
+          maxAge: 12 * 24 * 60 * 10,
         })
         .json({ token, user: { username: user.username, role: user.role } });
     }
